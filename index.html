@@ -44,6 +44,13 @@
 
     <section class="card">
       <div class="card-header">
+        <h2>Alertas do sistema</h2>
+      </div>
+      <pre id="systemMessage">Sistema carregado.</pre>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
         <h2>Login</h2>
         <button onclick="fazerLogin()">Testar login</button>
       </div>
@@ -64,6 +71,7 @@
           <input id="leadSource" type="text" placeholder="Origem" />
           <input id="leadBudget" type="text" placeholder="Orçamento" />
           <button onclick="criarLead()">Criar lead</button>
+          <button onclick="limparCamposLead()">Limpar campos</button>
         </div>
 
         <div id="leadsLista" class="list-box">
@@ -82,6 +90,7 @@
           <input id="proposalTitle" type="text" placeholder="Título da proposta" />
           <input id="proposalValue" type="text" placeholder="Valor" />
           <button onclick="criarProposta()">Criar proposta</button>
+          <button onclick="limparCamposProposta()">Limpar campos</button>
         </div>
 
         <div id="propostasLista" class="list-box">
@@ -115,42 +124,72 @@
       document.getElementById("resultadoTecnico").textContent = JSON.stringify(data, null, 2);
     }
 
+    function setSystemMessage(message) {
+      document.getElementById("systemMessage").textContent = message;
+    }
+
+    function limparCamposLead() {
+      document.getElementById("leadName").value = "";
+      document.getElementById("leadProject").value = "";
+      document.getElementById("leadCity").value = "";
+      document.getElementById("leadSource").value = "";
+      document.getElementById("leadBudget").value = "";
+      setSystemMessage("Campos de lead limpos.");
+    }
+
+    function limparCamposProposta() {
+      document.getElementById("proposalClient").value = "";
+      document.getElementById("proposalTitle").value = "";
+      document.getElementById("proposalValue").value = "";
+      setSystemMessage("Campos de proposta limpos.");
+    }
+
     async function testarBackend() {
+      setSystemMessage("Verificando backend...");
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
         document.getElementById("statusBackend").textContent = data.status || "Online";
         setTechnicalResult(data);
+        setSystemMessage("Backend conectado com sucesso.");
       } catch (error) {
         document.getElementById("statusBackend").textContent = "Erro";
         setTechnicalResult({ ok: false, error: "Não foi possível conectar no backend" });
+        setSystemMessage("Erro ao conectar no backend.");
       }
     }
 
     async function fazerLogin() {
+      setSystemMessage("Testando login...");
       try {
         const res = await fetch(API_URL + "/login");
         const data = await res.json();
         document.getElementById("loginResultado").textContent = JSON.stringify(data, null, 2);
         setTechnicalResult(data);
+        setSystemMessage("Login testado com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao testar login" });
+        setSystemMessage("Erro ao testar login.");
       }
     }
 
     async function listarLeads() {
+      setSystemMessage("Carregando leads...");
       try {
         const res = await fetch(API_URL + "/leads");
         const data = await res.json();
         renderLeads(data.items || []);
         document.getElementById("totalLeads").textContent = (data.items || []).length;
         setTechnicalResult(data);
+        setSystemMessage("Leads carregados com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao listar leads" });
+        setSystemMessage("Erro ao listar leads.");
       }
     }
 
     async function criarLead() {
+      setSystemMessage("Criando lead...");
       try {
         const payload = {
           name: document.getElementById("leadName").value || "Novo lead",
@@ -174,18 +213,16 @@
         const data = await res.json();
         setTechnicalResult(data);
         await listarLeads();
-
-        document.getElementById("leadName").value = "";
-        document.getElementById("leadProject").value = "";
-        document.getElementById("leadCity").value = "";
-        document.getElementById("leadSource").value = "";
-        document.getElementById("leadBudget").value = "";
+        limparCamposLead();
+        setSystemMessage("Lead criado com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao criar lead" });
+        setSystemMessage("Erro ao criar lead.");
       }
     }
 
     async function listarPropostas() {
+      setSystemMessage("Carregando propostas...");
       try {
         const res = await fetch(API_URL + "/proposals");
         const data = await res.json();
@@ -195,12 +232,15 @@
         document.getElementById("propostasEnviadas").textContent =
           items.filter(item => item.status === "Enviada").length;
         setTechnicalResult(data);
+        setSystemMessage("Propostas carregadas com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao listar propostas" });
+        setSystemMessage("Erro ao listar propostas.");
       }
     }
 
     async function criarProposta() {
+      setSystemMessage("Criando proposta...");
       try {
         const payload = {
           client: document.getElementById("proposalClient").value || "Cliente não informado",
@@ -220,12 +260,11 @@
         const data = await res.json();
         setTechnicalResult(data);
         await listarPropostas();
-
-        document.getElementById("proposalClient").value = "";
-        document.getElementById("proposalTitle").value = "";
-        document.getElementById("proposalValue").value = "";
+        limparCamposProposta();
+        setSystemMessage("Proposta criada com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao criar proposta" });
+        setSystemMessage("Erro ao criar proposta.");
       }
     }
 
