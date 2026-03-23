@@ -11,7 +11,7 @@
     <header class="topbar">
       <div>
         <h1>ZapFlow Arq</h1>
-        <p class="sub">Sistema comercial simples para arquitetura</p>
+        <p class="sub">CRM comercial para arquitetura</p>
       </div>
 
       <div class="theme-switch">
@@ -86,6 +86,21 @@
 
         <div class="form">
           <input id="leadSearch" type="text" placeholder="Buscar lead por nome" oninput="aplicarFiltros()" />
+
+          <select id="leadStageFilter" onchange="aplicarFiltros()">
+            <option value="">Filtrar por status</option>
+            <option value="Novo lead">Novo lead</option>
+            <option value="Reunião agendada">Reunião agendada</option>
+            <option value="Proposta enviada">Proposta enviada</option>
+            <option value="Fechado">Fechado</option>
+          </select>
+
+          <select id="leadTemperatureFilter" onchange="aplicarFiltros()">
+            <option value="">Filtrar por temperatura</option>
+            <option value="Quente">Quente</option>
+            <option value="Morno">Morno</option>
+            <option value="Frio">Frio</option>
+          </select>
         </div>
 
         <div class="form">
@@ -95,6 +110,22 @@
           <input id="leadCity" type="text" placeholder="Cidade" />
           <input id="leadSource" type="text" placeholder="Origem" />
           <input id="leadBudget" type="text" placeholder="Orçamento" />
+
+          <select id="leadStage">
+            <option value="Novo lead">Novo lead</option>
+            <option value="Reunião agendada">Reunião agendada</option>
+            <option value="Proposta enviada">Proposta enviada</option>
+            <option value="Fechado">Fechado</option>
+          </select>
+
+          <select id="leadTemperature">
+            <option value="Quente">Quente</option>
+            <option value="Morno">Morno</option>
+            <option value="Frio">Frio</option>
+          </select>
+
+          <input id="leadNextAction" type="text" placeholder="Próxima ação" />
+
           <button onclick="salvarLead()">Salvar lead</button>
           <button onclick="limparCamposLead()">Limpar campos</button>
         </div>
@@ -115,6 +146,8 @@
             <option value="">Filtrar propostas por status</option>
             <option value="Em montagem">Em montagem</option>
             <option value="Enviada">Enviada</option>
+            <option value="Aprovada">Aprovada</option>
+            <option value="Recusada">Recusada</option>
           </select>
         </div>
 
@@ -123,6 +156,12 @@
           <input id="proposalClient" type="text" placeholder="Cliente" />
           <input id="proposalTitle" type="text" placeholder="Título da proposta" />
           <input id="proposalValue" type="text" placeholder="Valor" />
+          <select id="proposalStatus">
+            <option value="Em montagem">Em montagem</option>
+            <option value="Enviada">Enviada</option>
+            <option value="Aprovada">Aprovada</option>
+            <option value="Recusada">Recusada</option>
+          </select>
           <button onclick="salvarProposta()">Salvar proposta</button>
           <button onclick="limparCamposProposta()">Limpar campos</button>
         </div>
@@ -172,6 +211,9 @@
       document.getElementById("leadCity").value = "";
       document.getElementById("leadSource").value = "";
       document.getElementById("leadBudget").value = "";
+      document.getElementById("leadStage").value = "Novo lead";
+      document.getElementById("leadTemperature").value = "Quente";
+      document.getElementById("leadNextAction").value = "";
       setSystemMessage("Campos de lead limpos.");
     }
 
@@ -180,6 +222,7 @@
       document.getElementById("proposalClient").value = "";
       document.getElementById("proposalTitle").value = "";
       document.getElementById("proposalValue").value = "";
+      document.getElementById("proposalStatus").value = "Em montagem";
       setSystemMessage("Campos de proposta limpos.");
     }
 
@@ -190,6 +233,9 @@
       document.getElementById("leadCity").value = item.city;
       document.getElementById("leadSource").value = item.source;
       document.getElementById("leadBudget").value = item.budget;
+      document.getElementById("leadStage").value = item.stage;
+      document.getElementById("leadTemperature").value = item.temperature;
+      document.getElementById("leadNextAction").value = item.nextAction;
       setSystemMessage("Lead carregado para edição.");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -199,6 +245,7 @@
       document.getElementById("proposalClient").value = item.client;
       document.getElementById("proposalTitle").value = item.title;
       document.getElementById("proposalValue").value = item.value;
+      document.getElementById("proposalStatus").value = item.status;
       setSystemMessage("Proposta carregada para edição.");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -215,11 +262,16 @@
 
     function aplicarFiltros() {
       const leadSearch = document.getElementById("leadSearch").value.trim().toLowerCase();
+      const leadStageFilter = document.getElementById("leadStageFilter").value;
+      const leadTemperatureFilter = document.getElementById("leadTemperatureFilter").value;
       const proposalStatusFilter = document.getElementById("proposalStatusFilter").value;
 
-      const filteredLeads = allLeads.filter(item =>
-        item.name.toLowerCase().includes(leadSearch)
-      );
+      const filteredLeads = allLeads.filter(item => {
+        const matchesName = item.name.toLowerCase().includes(leadSearch);
+        const matchesStage = !leadStageFilter || item.stage === leadStageFilter;
+        const matchesTemperature = !leadTemperatureFilter || item.temperature === leadTemperatureFilter;
+        return matchesName && matchesStage && matchesTemperature;
+      });
 
       const filteredProposals = allProposals.filter(item =>
         !proposalStatusFilter || item.status === proposalStatusFilter
@@ -284,28 +336,22 @@
       setSystemMessage("Criando lead...");
 
       try {
-        const name = document.getElementById("leadName").value.trim();
-        const project = document.getElementById("leadProject").value.trim();
-        const city = document.getElementById("leadCity").value.trim();
-        const source = document.getElementById("leadSource").value.trim();
-        const budget = document.getElementById("leadBudget").value.trim();
+        const payload = {
+          name: document.getElementById("leadName").value.trim(),
+          project: document.getElementById("leadProject").value.trim(),
+          city: document.getElementById("leadCity").value.trim(),
+          source: document.getElementById("leadSource").value.trim() || "WhatsApp",
+          budget: document.getElementById("leadBudget").value.trim() || "R$ 0,00",
+          stage: document.getElementById("leadStage").value,
+          temperature: document.getElementById("leadTemperature").value,
+          nextAction: document.getElementById("leadNextAction").value.trim() || "Responder em até 15 min"
+        };
 
-        if (!name || !project || !city) {
+        if (!payload.name || !payload.project || !payload.city) {
           setSystemMessage("Preencha nome, projeto e cidade antes de criar o lead.");
           setTechnicalResult({ ok: false, error: "Campos obrigatórios: nome, projeto e cidade" });
           return;
         }
-
-        const payload = {
-          name,
-          project,
-          city,
-          source: source || "WhatsApp",
-          budget: budget || "R$ 0,00",
-          stage: "Novo lead",
-          nextAction: "Responder em até 15 min",
-          temperature: "Quente"
-        };
 
         const res = await fetch(API_URL + "/leads", {
           method: "POST",
@@ -339,7 +385,10 @@
           project: document.getElementById("leadProject").value.trim(),
           city: document.getElementById("leadCity").value.trim(),
           source: document.getElementById("leadSource").value.trim(),
-          budget: document.getElementById("leadBudget").value.trim()
+          budget: document.getElementById("leadBudget").value.trim(),
+          stage: document.getElementById("leadStage").value,
+          temperature: document.getElementById("leadTemperature").value,
+          nextAction: document.getElementById("leadNextAction").value.trim()
         };
 
         const res = await fetch(API_URL + "/leads/" + id, {
@@ -413,22 +462,18 @@
       setSystemMessage("Criando proposta...");
 
       try {
-        const client = document.getElementById("proposalClient").value.trim();
-        const title = document.getElementById("proposalTitle").value.trim();
-        const value = document.getElementById("proposalValue").value.trim();
+        const payload = {
+          client: document.getElementById("proposalClient").value.trim(),
+          title: document.getElementById("proposalTitle").value.trim(),
+          value: document.getElementById("proposalValue").value.trim(),
+          status: document.getElementById("proposalStatus").value
+        };
 
-        if (!client || !title || !value) {
+        if (!payload.client || !payload.title || !payload.value) {
           setSystemMessage("Preencha cliente, título e valor antes de criar a proposta.");
           setTechnicalResult({ ok: false, error: "Campos obrigatórios: cliente, título e valor" });
           return;
         }
-
-        const payload = {
-          client,
-          title,
-          value,
-          status: "Em montagem"
-        };
 
         const res = await fetch(API_URL + "/proposals", {
           method: "POST",
@@ -460,7 +505,8 @@
         const payload = {
           client: document.getElementById("proposalClient").value.trim(),
           title: document.getElementById("proposalTitle").value.trim(),
-          value: document.getElementById("proposalValue").value.trim()
+          value: document.getElementById("proposalValue").value.trim(),
+          status: document.getElementById("proposalStatus").value
         };
 
         const res = await fetch(API_URL + "/proposals/" + id, {
