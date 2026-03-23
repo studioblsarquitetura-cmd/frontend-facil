@@ -21,13 +21,18 @@
 
     <section class="card">
       <div class="card-header">
-        <h2>Entrar</h2>
+        <h2 id="authTitle">Entrar</h2>
+        <button onclick="toggleAuthMode()" id="authToggleBtn">Criar conta</button>
+      </div>
+
+      <div class="form" id="registerNameWrap" style="display:none;">
+        <input id="registerName" type="text" placeholder="Seu nome" />
       </div>
 
       <div class="form">
         <input id="authEmail" type="email" placeholder="E-mail" value="demo@zapflow.com" />
         <input id="authPassword" type="password" placeholder="Senha" value="123456" />
-        <button onclick="loginReal()">Entrar no sistema</button>
+        <button onclick="submitAuth()" id="authSubmitBtn">Entrar no sistema</button>
       </div>
 
       <pre id="authMessage">Use o usuário demo para entrar.</pre>
@@ -399,6 +404,7 @@
 
     let allLeads = [];
     let allProposals = [];
+    let authMode = "login";
 
     function getToken() {
       return localStorage.getItem(TOKEN_KEY) || "";
@@ -445,6 +451,43 @@
       if (targetButton) targetButton.classList.add("active");
     }
 
+    function toggleAuthMode() {
+      authMode = authMode === "login" ? "register" : "login";
+
+      const title = document.getElementById("authTitle");
+      const toggleBtn = document.getElementById("authToggleBtn");
+      const submitBtn = document.getElementById("authSubmitBtn");
+      const nameWrap = document.getElementById("registerNameWrap");
+      const authMessage = document.getElementById("authMessage");
+      const emailInput = document.getElementById("authEmail");
+      const passwordInput = document.getElementById("authPassword");
+
+      if (authMode === "register") {
+        title.textContent = "Criar conta";
+        toggleBtn.textContent = "Já tenho conta";
+        submitBtn.textContent = "Criar conta";
+        nameWrap.style.display = "grid";
+        authMessage.textContent = "Crie sua conta para acessar o CRM.";
+        emailInput.value = "";
+        passwordInput.value = "";
+      } else {
+        title.textContent = "Entrar";
+        toggleBtn.textContent = "Criar conta";
+        submitBtn.textContent = "Entrar no sistema";
+        nameWrap.style.display = "none";
+        authMessage.textContent = "Use o usuário demo para entrar.";
+        emailInput.value = "demo@zapflow.com";
+        passwordInput.value = "123456";
+      }
+    }
+
+    async function submitAuth() {
+      if (authMode === "login") {
+        return loginReal();
+      }
+      return registerReal();
+    }
+
     function setTechnicalResult(data) {
       const el = document.getElementById("resultadoTecnico");
       if (el) el.textContent = JSON.stringify(data, null, 2);
@@ -473,6 +516,38 @@
     function showApp() {
       document.getElementById("loginScreen").style.display = "none";
       document.getElementById("appScreen").style.display = "block";
+    }
+
+    async function registerReal() {
+      const name = document.getElementById("registerName").value.trim();
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value.trim();
+
+      document.getElementById("authMessage").textContent = "Criando conta...";
+
+      try {
+        const res = await fetch(API_URL + "/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          document.getElementById("authMessage").textContent = data.error || "Erro ao criar conta";
+          return;
+        }
+
+        setToken(data.token);
+        document.getElementById("loggedUser").textContent = data.user.name;
+        document.getElementById("authInfo").textContent = JSON.stringify(data.user, null, 2);
+        showApp();
+        await carregarSistema();
+        setSystemMessage("Conta criada com sucesso.");
+      } catch (error) {
+        document.getElementById("authMessage").textContent = "Erro ao criar conta";
+      }
     }
 
     async function loginReal() {
