@@ -7,7 +7,34 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body data-theme="light">
-  <div class="app">
+  <div class="app" id="loginScreen">
+    <header class="topbar">
+      <div>
+        <h1>ZapFlow Arq</h1>
+        <p class="sub">Acesso ao CRM</p>
+      </div>
+      <div class="theme-switch">
+        <button onclick="setTheme('light')">☀️ Claro</button>
+        <button onclick="setTheme('dark')">🌙 Noturno</button>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Entrar</h2>
+      </div>
+
+      <div class="form">
+        <input id="authEmail" type="email" placeholder="E-mail" value="demo@zapflow.com" />
+        <input id="authPassword" type="password" placeholder="Senha" value="123456" />
+        <button onclick="loginReal()">Entrar no sistema</button>
+      </div>
+
+      <pre id="authMessage">Use o usuário demo para entrar.</pre>
+    </section>
+  </div>
+
+  <div class="app" id="appScreen" style="display:none;">
     <header class="topbar">
       <div>
         <h1>ZapFlow Arq</h1>
@@ -17,6 +44,7 @@
       <div class="theme-switch">
         <button onclick="setTheme('light')">☀️ Claro</button>
         <button onclick="setTheme('dark')">🌙 Noturno</button>
+        <button onclick="logout()">Sair</button>
       </div>
     </header>
 
@@ -59,6 +87,48 @@
       <div class="card stat-card">
         <span>Status Backend</span>
         <strong id="statusBackend">Aguardando</strong>
+      </div>
+    </section>
+
+    <section class="grid stats-grid">
+      <div class="card stat-card">
+        <span>Valor Total Propostas</span>
+        <strong id="commercialTotalValue">R$ 0,00</strong>
+      </div>
+
+      <div class="card stat-card">
+        <span>Aprovadas</span>
+        <strong id="commercialApproved">0</strong>
+      </div>
+
+      <div class="card stat-card">
+        <span>Recusadas</span>
+        <strong id="commercialRefused">0</strong>
+      </div>
+
+      <div class="card stat-card">
+        <span>Taxa Aprovação</span>
+        <strong id="commercialApprovalRate">0%</strong>
+      </div>
+
+      <div class="card stat-card">
+        <span>Taxa Recusa</span>
+        <strong id="commercialRefusalRate">0%</strong>
+      </div>
+
+      <div class="card stat-card">
+        <span>Enviadas</span>
+        <strong id="commercialSent">0</strong>
+      </div>
+
+      <div class="card stat-card">
+        <span>Total Comercial</span>
+        <strong id="commercialTotalCount">0</strong>
+      </div>
+
+      <div class="card stat-card">
+        <span>Usuário</span>
+        <strong id="loggedUser">-</strong>
       </div>
     </section>
 
@@ -228,14 +298,6 @@
 
     <section class="card">
       <div class="card-header">
-        <h2>Login</h2>
-        <button onclick="fazerLogin()">Testar login</button>
-      </div>
-      <pre id="loginResultado">Aguardando...</pre>
-    </section>
-
-    <section class="card">
-      <div class="card-header">
         <h2>Resultado técnico</h2>
       </div>
       <pre id="resultadoTecnico">Pronto para uso.</pre>
@@ -244,9 +306,30 @@
 
   <script>
     const API_URL = "https://backend-facil-production.up.railway.app";
+    const TOKEN_KEY = "zapflow-token";
 
     let allLeads = [];
     let allProposals = [];
+
+    function getToken() {
+      return localStorage.getItem(TOKEN_KEY) || "";
+    }
+
+    function setToken(token) {
+      localStorage.setItem(TOKEN_KEY, token);
+    }
+
+    function clearToken() {
+      localStorage.removeItem(TOKEN_KEY);
+    }
+
+    function authHeaders() {
+      const token = getToken();
+      return {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      };
+    }
 
     function setTheme(theme) {
       document.body.setAttribute("data-theme", theme);
@@ -259,11 +342,119 @@
     }
 
     function setTechnicalResult(data) {
-      document.getElementById("resultadoTecnico").textContent = JSON.stringify(data, null, 2);
+      const el = document.getElementById("resultadoTecnico");
+      if (el) el.textContent = JSON.stringify(data, null, 2);
     }
 
     function setSystemMessage(message) {
-      document.getElementById("systemMessage").textContent = message;
+      const el = document.getElementById("systemMessage");
+      if (el) el.textContent = message;
+    }
+
+    function showLogin() {
+      document.getElementById("loginScreen").style.display = "block";
+      document.getElementById("appScreen").style.display = "none";
+    }
+
+    function showApp() {
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("appScreen").style.display = "block";
+    }
+
+    async function loginReal() {
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value.trim();
+
+      document.getElementById("authMessage").textContent = "Entrando...";
+
+      try {
+        const res = await fetch(API_URL + "/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          document.getElementById("authMessage").textContent = data.error || "Erro no login";
+          return;
+        }
+
+        setToken(data.token);
+        document.getElementById("loggedUser").textContent = data.user.name;
+        showApp();
+        await carregarSistema();
+      } catch (error) {
+        document.getElementById("authMessage").textContent = "Erro ao entrar";
+      }
+    }
+
+    async function validarSessao() {
+      const token = getToken();
+      if (!token) {
+        showLogin();
+        return;
+      }
+
+      try {
+        const res = await fetch(API_URL + "/me", {
+          headers: {
+            "Authorization": "Bearer " + token
+          }
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          clearToken();
+          showLogin();
+          return;
+        }
+
+        document.getElementById("loggedUser").textContent = data.user.name || data.user.email;
+        showApp();
+        await carregarSistema();
+      } catch (error) {
+        clearToken();
+        showLogin();
+      }
+    }
+
+    function logout() {
+      clearToken();
+      showLogin();
+    }
+
+    async function carregarResumoComercial() {
+      try {
+        const res = await fetch(API_URL + "/commercial-summary", {
+          headers: {
+            "Authorization": "Bearer " + getToken()
+          }
+        });
+        const data = await res.json();
+
+        if (!data.ok) return;
+
+        const s = data.summary;
+
+        document.getElementById("commercialTotalValue").textContent = formatMoneyBr(s.totalValue);
+        document.getElementById("commercialApproved").textContent = s.approvedCount;
+        document.getElementById("commercialRefused").textContent = s.refusedCount;
+        document.getElementById("commercialApprovalRate").textContent = s.approvalRate + "%";
+        document.getElementById("commercialRefusalRate").textContent = s.refusalRate + "%";
+        document.getElementById("commercialSent").textContent = s.sentCount;
+        document.getElementById("commercialTotalCount").textContent = s.totalCount;
+      } catch (error) {}
+    }
+
+    function formatMoneyBr(value) {
+      const number = Number(value || 0);
+      return number.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      });
     }
 
     function limparCamposLead() {
@@ -393,11 +584,15 @@
     async function testarBackend() {
       setSystemMessage("Verificando backend...");
       try {
-        const res = await fetch(API_URL);
+        const res = await fetch(API_URL + "/me", {
+          headers: {
+            "Authorization": "Bearer " + getToken()
+          }
+        });
         const data = await res.json();
-        document.getElementById("statusBackend").textContent = data.status || "Online";
+        document.getElementById("statusBackend").textContent = res.ok ? "Online" : "Erro";
         setTechnicalResult(data);
-        setSystemMessage("Backend conectado com sucesso.");
+        setSystemMessage(res.ok ? "Backend conectado com sucesso." : "Erro ao conectar no backend.");
       } catch (error) {
         document.getElementById("statusBackend").textContent = "Erro";
         setTechnicalResult({ ok: false, error: "Não foi possível conectar no backend" });
@@ -405,24 +600,14 @@
       }
     }
 
-    async function fazerLogin() {
-      setSystemMessage("Testando login...");
-      try {
-        const res = await fetch(API_URL + "/login");
-        const data = await res.json();
-        document.getElementById("loginResultado").textContent = JSON.stringify(data, null, 2);
-        setTechnicalResult(data);
-        setSystemMessage("Login testado com sucesso.");
-      } catch (error) {
-        setTechnicalResult({ ok: false, error: "Erro ao testar login" });
-        setSystemMessage("Erro ao testar login.");
-      }
-    }
-
     async function listarLeads() {
       setSystemMessage("Carregando leads...");
       try {
-        const res = await fetch(API_URL + "/leads");
+        const res = await fetch(API_URL + "/leads", {
+          headers: {
+            "Authorization": "Bearer " + getToken()
+          }
+        });
         const data = await res.json();
         allLeads = data.items || [];
         aplicarFiltros();
@@ -464,7 +649,7 @@
 
         const res = await fetch(API_URL + "/leads", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: authHeaders(),
           body: JSON.stringify(payload)
         });
 
@@ -503,7 +688,7 @@
 
         const res = await fetch(API_URL + "/leads/" + id, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: authHeaders(),
           body: JSON.stringify(payload)
         });
 
@@ -527,7 +712,10 @@
     async function avancarLead(id) {
       try {
         const res = await fetch(API_URL + "/leads/" + id + "/advance", {
-          method: "POST"
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + getToken()
+          }
         });
         const data = await res.json();
         setTechnicalResult(data);
@@ -541,7 +729,10 @@
     async function voltarLead(id) {
       try {
         const res = await fetch(API_URL + "/leads/" + id + "/back", {
-          method: "POST"
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + getToken()
+          }
         });
         const data = await res.json();
         setTechnicalResult(data);
@@ -558,7 +749,12 @@
       setSystemMessage("Excluindo lead...");
 
       try {
-        const res = await fetch(API_URL + "/leads/" + id, { method: "DELETE" });
+        const res = await fetch(API_URL + "/leads/" + id, {
+          method: "DELETE",
+          headers: {
+            "Authorization": "Bearer " + getToken()
+          }
+        });
         const data = await res.json();
         setTechnicalResult(data);
 
@@ -578,11 +774,16 @@
     async function listarPropostas() {
       setSystemMessage("Carregando propostas...");
       try {
-        const res = await fetch(API_URL + "/proposals");
+        const res = await fetch(API_URL + "/proposals", {
+          headers: {
+            "Authorization": "Bearer " + getToken()
+          }
+        });
         const data = await res.json();
         allProposals = data.items || [];
         aplicarFiltros();
         setTechnicalResult(data);
+        await carregarResumoComercial();
         setSystemMessage("Propostas carregadas com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao listar propostas" });
@@ -616,7 +817,7 @@
 
         const res = await fetch(API_URL + "/proposals", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: authHeaders(),
           body: JSON.stringify(payload)
         });
 
@@ -651,7 +852,7 @@
 
         const res = await fetch(API_URL + "/proposals/" + id, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: authHeaders(),
           body: JSON.stringify(payload)
         });
 
@@ -678,7 +879,12 @@
       setSystemMessage("Excluindo proposta...");
 
       try {
-        const res = await fetch(API_URL + "/proposals/" + id, { method: "DELETE" });
+        const res = await fetch(API_URL + "/proposals/" + id, {
+          method: "DELETE",
+          headers: {
+            "Authorization": "Bearer " + getToken()
+          }
+        });
         const data = await res.json();
         setTechnicalResult(data);
 
@@ -746,10 +952,15 @@
       `).join("");
     }
 
+    async function carregarSistema() {
+      await testarBackend();
+      await listarLeads();
+      await listarPropostas();
+      await carregarResumoComercial();
+    }
+
     loadTheme();
-    testarBackend();
-    listarLeads();
-    listarPropostas();
+    validarSessao();
   </script>
 </body>
 </html>
