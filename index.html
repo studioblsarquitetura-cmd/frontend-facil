@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZapFlow Arq</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>ZapFlow Arq</h1>
+    <p class="sub">Frontend simples conectado ao backend</p>
+
+    <div class="card">
+      <h2>1. Login</h2>
+      <button onclick="fazerLogin()">Testar login</button>
+      <pre id="loginResultado">Aguardando...</pre>
+    </div>
+
+    <div class="card">
+      <h2>2. Leads</h2>
+      <button onclick="listarLeads()">Listar leads</button>
+      <button onclick="criarLead()">Criar lead teste</button>
+      <pre id="leadsResultado">Aguardando...</pre>
+    </div>
+
+    <div class="card">
+      <h2>3. Propostas</h2>
+      <button onclick="listarPropostas()">Listar propostas</button>
+      <button onclick="criarProposta()">Criar proposta teste</button>
+      <pre id="propostasResultado">Aguardando...</pre>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "backend-facil-production.up.railway.app";
+
+    async function fazerLogin() {
+      const res = await fetch(API_URL + "/login");
+      const data = await res.json();
+      document.getElementById("loginResultado").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function listarLeads() {
+      const res = await fetch(API_URL + "/leads");
+      const data = await res.json();
+      document.getElementById("leadsResultado").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function criarLead() {
+      const res = await fetch(API_URL + "/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: "Lead Teste",
+          project: "Projeto Teste",
+          city: "Gravataí",
+          source: "WhatsApp",
+          budget: "R$ 12.000",
+          stage: "Novo lead",
+          nextAction: "Responder hoje",
+          temperature: "Quente"
+        })
+      });
+
+      const data = await res.json();
+      document.getElementById("leadsResultado").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function listarPropostas() {
+      const res = await fetch(API_URL + "/proposals");
+      const data = await res.json();
+      document.getElementById("propostasResultado").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function criarProposta() {
+      const res = await fetch(API_URL + "/proposals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          client: "Lead Teste",
+          title: "Proposta Teste",
+          value: "R$ 8.000",
+          status: "Em montagem"
+        })
+      });
+
+      const data = await res.json();
+      document.getElementById("propostasResultado").textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
