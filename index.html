@@ -65,12 +65,13 @@
         </div>
 
         <div class="form">
+          <input id="leadId" type="hidden" />
           <input id="leadName" type="text" placeholder="Nome do cliente" />
           <input id="leadProject" type="text" placeholder="Projeto" />
           <input id="leadCity" type="text" placeholder="Cidade" />
           <input id="leadSource" type="text" placeholder="Origem" />
           <input id="leadBudget" type="text" placeholder="Orçamento" />
-          <button onclick="criarLead()">Criar lead</button>
+          <button onclick="salvarLead()">Salvar lead</button>
           <button onclick="limparCamposLead()">Limpar campos</button>
         </div>
 
@@ -86,10 +87,11 @@
         </div>
 
         <div class="form">
+          <input id="proposalId" type="hidden" />
           <input id="proposalClient" type="text" placeholder="Cliente" />
           <input id="proposalTitle" type="text" placeholder="Título da proposta" />
           <input id="proposalValue" type="text" placeholder="Valor" />
-          <button onclick="criarProposta()">Criar proposta</button>
+          <button onclick="salvarProposta()">Salvar proposta</button>
           <button onclick="limparCamposProposta()">Limpar campos</button>
         </div>
 
@@ -129,6 +131,7 @@
     }
 
     function limparCamposLead() {
+      document.getElementById("leadId").value = "";
       document.getElementById("leadName").value = "";
       document.getElementById("leadProject").value = "";
       document.getElementById("leadCity").value = "";
@@ -138,10 +141,31 @@
     }
 
     function limparCamposProposta() {
+      document.getElementById("proposalId").value = "";
       document.getElementById("proposalClient").value = "";
       document.getElementById("proposalTitle").value = "";
       document.getElementById("proposalValue").value = "";
       setSystemMessage("Campos de proposta limpos.");
+    }
+
+    function preencherLead(item) {
+      document.getElementById("leadId").value = item.id;
+      document.getElementById("leadName").value = item.name;
+      document.getElementById("leadProject").value = item.project;
+      document.getElementById("leadCity").value = item.city;
+      document.getElementById("leadSource").value = item.source;
+      document.getElementById("leadBudget").value = item.budget;
+      setSystemMessage("Lead carregado para edição.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function preencherProposta(item) {
+      document.getElementById("proposalId").value = item.id;
+      document.getElementById("proposalClient").value = item.client;
+      document.getElementById("proposalTitle").value = item.title;
+      document.getElementById("proposalValue").value = item.value;
+      setSystemMessage("Proposta carregada para edição.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     async function testarBackend() {
@@ -188,6 +212,16 @@
       }
     }
 
+    async function salvarLead() {
+      const id = document.getElementById("leadId").value.trim();
+
+      if (id) {
+        return editarLead(Number(id));
+      }
+
+      return criarLead();
+    }
+
     async function criarLead() {
       setSystemMessage("Criando lead...");
 
@@ -200,10 +234,7 @@
 
         if (!name || !project || !city) {
           setSystemMessage("Preencha nome, projeto e cidade antes de criar o lead.");
-          setTechnicalResult({
-            ok: false,
-            error: "Campos obrigatórios: nome, projeto e cidade"
-          });
+          setTechnicalResult({ ok: false, error: "Campos obrigatórios: nome, projeto e cidade" });
           return;
         }
 
@@ -220,9 +251,7 @@
 
         const res = await fetch(API_URL + "/leads", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
 
@@ -243,16 +272,48 @@
       }
     }
 
+    async function editarLead(id) {
+      setSystemMessage("Editando lead...");
+
+      try {
+        const payload = {
+          name: document.getElementById("leadName").value.trim(),
+          project: document.getElementById("leadProject").value.trim(),
+          city: document.getElementById("leadCity").value.trim(),
+          source: document.getElementById("leadSource").value.trim(),
+          budget: document.getElementById("leadBudget").value.trim()
+        };
+
+        const res = await fetch(API_URL + "/leads/" + id, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        setTechnicalResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao editar lead.");
+          return;
+        }
+
+        await listarLeads();
+        limparCamposLead();
+        setSystemMessage("Lead editado com sucesso.");
+      } catch (error) {
+        setTechnicalResult({ ok: false, error: "Erro ao editar lead" });
+        setSystemMessage("Erro ao editar lead.");
+      }
+    }
+
     async function excluirLead(id) {
       if (!confirm("Deseja realmente excluir este lead?")) return;
 
       setSystemMessage("Excluindo lead...");
 
       try {
-        const res = await fetch(API_URL + "/leads/" + id, {
-          method: "DELETE"
-        });
-
+        const res = await fetch(API_URL + "/leads/" + id, { method: "DELETE" });
         const data = await res.json();
         setTechnicalResult(data);
 
@@ -287,6 +348,16 @@
       }
     }
 
+    async function salvarProposta() {
+      const id = document.getElementById("proposalId").value.trim();
+
+      if (id) {
+        return editarProposta(Number(id));
+      }
+
+      return criarProposta();
+    }
+
     async function criarProposta() {
       setSystemMessage("Criando proposta...");
 
@@ -297,10 +368,7 @@
 
         if (!client || !title || !value) {
           setSystemMessage("Preencha cliente, título e valor antes de criar a proposta.");
-          setTechnicalResult({
-            ok: false,
-            error: "Campos obrigatórios: cliente, título e valor"
-          });
+          setTechnicalResult({ ok: false, error: "Campos obrigatórios: cliente, título e valor" });
           return;
         }
 
@@ -313,9 +381,7 @@
 
         const res = await fetch(API_URL + "/proposals", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
 
@@ -336,16 +402,46 @@
       }
     }
 
+    async function editarProposta(id) {
+      setSystemMessage("Editando proposta...");
+
+      try {
+        const payload = {
+          client: document.getElementById("proposalClient").value.trim(),
+          title: document.getElementById("proposalTitle").value.trim(),
+          value: document.getElementById("proposalValue").value.trim()
+        };
+
+        const res = await fetch(API_URL + "/proposals/" + id, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        setTechnicalResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao editar proposta.");
+          return;
+        }
+
+        await listarPropostas();
+        limparCamposProposta();
+        setSystemMessage("Proposta editada com sucesso.");
+      } catch (error) {
+        setTechnicalResult({ ok: false, error: "Erro ao editar proposta" });
+        setSystemMessage("Erro ao editar proposta.");
+      }
+    }
+
     async function excluirProposta(id) {
       if (!confirm("Deseja realmente excluir esta proposta?")) return;
 
       setSystemMessage("Excluindo proposta...");
 
       try {
-        const res = await fetch(API_URL + "/proposals/" + id, {
-          method: "DELETE"
-        });
-
+        const res = await fetch(API_URL + "/proposals/" + id, { method: "DELETE" });
         const data = await res.json();
         setTechnicalResult(data);
 
@@ -381,6 +477,7 @@
           <div class="item-line">Origem: ${item.source}</div>
           <div class="item-line">Orçamento: ${item.budget}</div>
           <div class="item-line muted">Próxima ação: ${item.nextAction}</div>
+          <button onclick='preencherLead(${JSON.stringify(item)})'>Editar lead</button>
           <button onclick="excluirLead(${item.id})">Excluir lead</button>
         </div>
       `).join("");
@@ -402,6 +499,7 @@
           </div>
           <div class="item-line">Cliente: ${item.client}</div>
           <div class="item-line">Valor: ${item.value}</div>
+          <button onclick='preencherProposta(${JSON.stringify(item)})'>Editar proposta</button>
           <button onclick="excluirProposta(${item.id})">Excluir proposta</button>
         </div>
       `).join("");
