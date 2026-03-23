@@ -227,6 +227,7 @@
           <input id="leadName" type="text" placeholder="Nome do cliente" />
           <input id="leadProject" type="text" placeholder="Projeto" />
           <input id="leadCity" type="text" placeholder="Cidade" />
+          <input id="leadPhone" type="text" placeholder="Telefone WhatsApp (5511999999999)" />
           <input id="leadSource" type="text" placeholder="Origem" />
           <input id="leadBudget" type="text" placeholder="Orçamento" />
 
@@ -298,6 +299,14 @@
 
     <section class="card">
       <div class="card-header">
+        <h2>Login</h2>
+        <button onclick="validarSessao()">Atualizar sessão</button>
+      </div>
+      <pre id="authInfo">Sessão ativa.</pre>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
         <h2>Resultado técnico</h2>
       </div>
       <pre id="resultadoTecnico">Pronto para uso.</pre>
@@ -324,10 +333,9 @@
     }
 
     function authHeaders() {
-      const token = getToken();
       return {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
+        "Authorization": "Bearer " + getToken()
       };
     }
 
@@ -383,6 +391,7 @@
 
         setToken(data.token);
         document.getElementById("loggedUser").textContent = data.user.name;
+        document.getElementById("authInfo").textContent = JSON.stringify(data.user, null, 2);
         showApp();
         await carregarSistema();
       } catch (error) {
@@ -413,6 +422,7 @@
         }
 
         document.getElementById("loggedUser").textContent = data.user.name || data.user.email;
+        document.getElementById("authInfo").textContent = JSON.stringify(data.user, null, 2);
         showApp();
         await carregarSistema();
       } catch (error) {
@@ -462,6 +472,7 @@
       document.getElementById("leadName").value = "";
       document.getElementById("leadProject").value = "";
       document.getElementById("leadCity").value = "";
+      document.getElementById("leadPhone").value = "";
       document.getElementById("leadSource").value = "";
       document.getElementById("leadBudget").value = "";
       document.getElementById("leadStage").value = "Novo lead";
@@ -486,6 +497,7 @@
       document.getElementById("leadName").value = item.name;
       document.getElementById("leadProject").value = item.project;
       document.getElementById("leadCity").value = item.city;
+      document.getElementById("leadPhone").value = item.phone || "";
       document.getElementById("leadSource").value = item.source;
       document.getElementById("leadBudget").value = item.budget;
       document.getElementById("leadStage").value = item.stage;
@@ -505,6 +517,49 @@
       document.getElementById("proposalNote").value = item.note || "";
       setSystemMessage("Proposta carregada para edição.");
       window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function enviarWhatsAppLead(item) {
+      const to = (item.phone || "").trim();
+
+      if (!to) {
+        setSystemMessage("Este lead não tem telefone cadastrado.");
+        setTechnicalResult({ ok: false, error: "Telefone do lead não informado" });
+        return;
+      }
+
+      const customMessage = prompt(
+        "Digite a mensagem para enviar no WhatsApp:",
+        `Olá, ${item.name}! Aqui é do ZapFlow Arq. Estou entrando em contato sobre ${item.project}.`
+      );
+
+      if (!customMessage) return;
+
+      setSystemMessage("Enviando mensagem no WhatsApp...");
+
+      try {
+        const res = await fetch(API_URL + "/whatsapp/send", {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify({
+            to,
+            message: customMessage
+          })
+        });
+
+        const data = await res.json();
+        setTechnicalResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.detail || data.error || "Erro ao enviar WhatsApp.");
+          return;
+        }
+
+        setSystemMessage("Mensagem enviada no WhatsApp com sucesso.");
+      } catch (error) {
+        setTechnicalResult({ ok: false, error: "Erro ao enviar WhatsApp" });
+        setSystemMessage("Erro ao enviar WhatsApp.");
+      }
     }
 
     function atualizarDashboard(leads, proposals) {
@@ -633,6 +688,7 @@
           name: document.getElementById("leadName").value.trim(),
           project: document.getElementById("leadProject").value.trim(),
           city: document.getElementById("leadCity").value.trim(),
+          phone: document.getElementById("leadPhone").value.trim(),
           source: document.getElementById("leadSource").value.trim() || "WhatsApp",
           budget: document.getElementById("leadBudget").value.trim() || "R$ 0,00",
           stage: document.getElementById("leadStage").value,
@@ -678,6 +734,7 @@
           name: document.getElementById("leadName").value.trim(),
           project: document.getElementById("leadProject").value.trim(),
           city: document.getElementById("leadCity").value.trim(),
+          phone: document.getElementById("leadPhone").value.trim(),
           source: document.getElementById("leadSource").value.trim(),
           budget: document.getElementById("leadBudget").value.trim(),
           stage: document.getElementById("leadStage").value,
@@ -917,12 +974,14 @@
           </div>
           <div class="item-line">${item.project}</div>
           <div class="item-line">Cidade: ${item.city}</div>
+          <div class="item-line">Telefone: ${item.phone || "Sem telefone"}</div>
           <div class="item-line">Origem: ${item.source}</div>
           <div class="item-line">Orçamento: ${item.budget}</div>
           <div class="item-line">Temperatura: ${item.temperature}</div>
           <div class="item-line muted">Próxima ação: ${item.nextAction}</div>
           <div class="item-line muted">Observações: ${item.notes || "Sem observações"}</div>
           <button onclick='preencherLead(${JSON.stringify(item)})'>Editar lead</button>
+          <button onclick="enviarWhatsAppLead(${JSON.stringify(item).replace(/"/g, '&quot;')})">Enviar WhatsApp</button>
           <button onclick="excluirLead(${item.id})">Excluir lead</button>
         </div>
       `).join("");
