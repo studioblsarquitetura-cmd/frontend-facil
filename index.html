@@ -64,6 +64,34 @@
 
     <section class="card">
       <div class="card-header">
+        <h2>Funil Comercial</h2>
+      </div>
+
+      <div class="grid stats-grid">
+        <div class="card stat-card">
+          <span>Novo lead</span>
+          <strong id="funnelNovoLead">0</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Reunião agendada</span>
+          <strong id="funnelReuniao">0</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Proposta enviada</span>
+          <strong id="funnelProposta">0</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Fechado</span>
+          <strong id="funnelFechado">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
         <h2>Alertas do sistema</h2>
       </div>
       <pre id="systemMessage">Sistema carregado.</pre>
@@ -253,11 +281,28 @@
     function atualizarDashboard(leads, proposals) {
       document.getElementById("totalLeads").textContent = leads.length;
       document.getElementById("totalPropostas").textContent = proposals.length;
-      document.getElementById("propostasMontagem").textContent = proposals.filter(item => item.status === "Em montagem").length;
-      document.getElementById("propostasEnviadas").textContent = proposals.filter(item => item.status === "Enviada").length;
-      document.getElementById("leadsQuentes").textContent = leads.filter(item => item.temperature === "Quente").length;
-      document.getElementById("leadsMornos").textContent = leads.filter(item => item.temperature === "Morno").length;
-      document.getElementById("leadsFrios").textContent = leads.filter(item => item.temperature === "Frio").length;
+      document.getElementById("propostasMontagem").textContent =
+        proposals.filter(item => item.status === "Em montagem").length;
+      document.getElementById("propostasEnviadas").textContent =
+        proposals.filter(item => item.status === "Enviada").length;
+      document.getElementById("leadsQuentes").textContent =
+        leads.filter(item => item.temperature === "Quente").length;
+      document.getElementById("leadsMornos").textContent =
+        leads.filter(item => item.temperature === "Morno").length;
+      document.getElementById("leadsFrios").textContent =
+        leads.filter(item => item.temperature === "Frio").length;
+
+      document.getElementById("funnelNovoLead").textContent =
+        leads.filter(item => item.stage === "Novo lead").length;
+
+      document.getElementById("funnelReuniao").textContent =
+        leads.filter(item => item.stage === "Reunião agendada").length;
+
+      document.getElementById("funnelProposta").textContent =
+        leads.filter(item => item.stage === "Proposta enviada").length;
+
+      document.getElementById("funnelFechado").textContent =
+        leads.filter(item => item.stage === "Fechado").length;
     }
 
     function aplicarFiltros() {
