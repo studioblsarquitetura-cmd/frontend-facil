@@ -134,6 +134,22 @@
 
     <section class="card">
       <div class="card-header">
+        <h2>Configurações do usuário</h2>
+        <button onclick="carregarSettings()">Carregar configurações</button>
+      </div>
+
+      <div class="form">
+        <input id="settingsWhatsappAccessToken" type="text" placeholder="WhatsApp Access Token" />
+        <input id="settingsWhatsappPhoneNumberId" type="text" placeholder="WhatsApp Phone Number ID" />
+        <input id="settingsWhatsappVerifyToken" type="text" placeholder="WhatsApp Verify Token" />
+        <button onclick="salvarSettings()">Salvar configurações</button>
+      </div>
+
+      <pre id="settingsResult">Aguardando configurações.</pre>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
         <h2>Funil Comercial</h2>
       </div>
 
@@ -299,7 +315,7 @@
 
     <section class="card">
       <div class="card-header">
-        <h2>Login</h2>
+        <h2>Informações da sessão</h2>
         <button onclick="validarSessao()">Atualizar sessão</button>
       </div>
       <pre id="authInfo">Sessão ativa.</pre>
@@ -357,6 +373,11 @@
     function setSystemMessage(message) {
       const el = document.getElementById("systemMessage");
       if (el) el.textContent = message;
+    }
+
+    function setSettingsResult(data) {
+      const el = document.getElementById("settingsResult");
+      if (el) el.textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
     }
 
     function showLogin() {
@@ -434,6 +455,69 @@
     function logout() {
       clearToken();
       showLogin();
+    }
+
+    async function carregarSettings() {
+      setSystemMessage("Carregando configurações do usuário...");
+
+      try {
+        const res = await fetch(API_URL + "/settings", {
+          headers: {
+            "Authorization": "Bearer " + getToken()
+          }
+        });
+
+        const data = await res.json();
+        setTechnicalResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao carregar configurações.");
+          return;
+        }
+
+        const item = data.item || {};
+        document.getElementById("settingsWhatsappAccessToken").value = item.whatsappAccessToken || "";
+        document.getElementById("settingsWhatsappPhoneNumberId").value = item.whatsappPhoneNumberId || "";
+        document.getElementById("settingsWhatsappVerifyToken").value = item.whatsappVerifyToken || "";
+
+        setSettingsResult(data);
+        setSystemMessage("Configurações carregadas com sucesso.");
+      } catch (error) {
+        setTechnicalResult({ ok: false, error: "Erro ao carregar configurações" });
+        setSystemMessage("Erro ao carregar configurações.");
+      }
+    }
+
+    async function salvarSettings() {
+      setSystemMessage("Salvando configurações do usuário...");
+
+      try {
+        const payload = {
+          whatsappAccessToken: document.getElementById("settingsWhatsappAccessToken").value.trim(),
+          whatsappPhoneNumberId: document.getElementById("settingsWhatsappPhoneNumberId").value.trim(),
+          whatsappVerifyToken: document.getElementById("settingsWhatsappVerifyToken").value.trim()
+        };
+
+        const res = await fetch(API_URL + "/settings", {
+          method: "PUT",
+          headers: authHeaders(),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        setTechnicalResult(data);
+        setSettingsResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao salvar configurações.");
+          return;
+        }
+
+        setSystemMessage("Configurações salvas com sucesso.");
+      } catch (error) {
+        setTechnicalResult({ ok: false, error: "Erro ao salvar configurações" });
+        setSystemMessage("Erro ao salvar configurações.");
+      }
     }
 
     async function carregarResumoComercial() {
@@ -1013,6 +1097,7 @@
 
     async function carregarSistema() {
       await testarBackend();
+      await carregarSettings();
       await listarLeads();
       await listarPropostas();
       await carregarResumoComercial();
