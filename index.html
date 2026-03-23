@@ -7,91 +7,219 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>ZapFlow Arq</h1>
-    <p class="sub">Frontend simples conectado ao backend</p>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <h1>ZapFlow Arq</h1>
+        <p class="sub">Sistema comercial simples para arquitetura</p>
+      </div>
 
-    <div class="card">
-      <h2>1. Login</h2>
-      <button onclick="fazerLogin()">Testar login</button>
+      <div class="theme-switch">
+        <button onclick="setTheme('light')">☀️ Claro</button>
+        <button onclick="setTheme('dark')">🌙 Noturno</button>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Login</h2>
+        <button onclick="fazerLogin()">Testar login</button>
+      </div>
       <pre id="loginResultado">Aguardando...</pre>
-    </div>
+    </section>
 
-    <div class="card">
-      <h2>2. Leads</h2>
-      <button onclick="listarLeads()">Listar leads</button>
-      <button onclick="criarLead()">Criar lead teste</button>
-      <pre id="leadsResultado">Aguardando...</pre>
-    </div>
+    <section class="grid">
+      <div class="card">
+        <div class="card-header">
+          <h2>Leads</h2>
+          <div class="actions">
+            <button onclick="listarLeads()">Atualizar leads</button>
+          </div>
+        </div>
 
-    <div class="card">
-      <h2>3. Propostas</h2>
-      <button onclick="listarPropostas()">Listar propostas</button>
-      <button onclick="criarProposta()">Criar proposta teste</button>
-      <pre id="propostasResultado">Aguardando...</pre>
-    </div>
+        <div class="form">
+          <input id="leadName" type="text" placeholder="Nome do cliente" />
+          <input id="leadProject" type="text" placeholder="Projeto" />
+          <input id="leadCity" type="text" placeholder="Cidade" />
+          <input id="leadSource" type="text" placeholder="Origem" />
+          <input id="leadBudget" type="text" placeholder="Orçamento" />
+          <button onclick="criarLead()">Criar lead</button>
+        </div>
+
+        <div id="leadsLista" class="list-box">
+          <p class="placeholder">Nenhum lead carregado.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Propostas</h2>
+          <div class="actions">
+            <button onclick="listarPropostas()">Atualizar propostas</button>
+          </div>
+        </div>
+
+        <div class="form">
+          <input id="proposalClient" type="text" placeholder="Cliente" />
+          <input id="proposalTitle" type="text" placeholder="Título da proposta" />
+          <input id="proposalValue" type="text" placeholder="Valor" />
+          <button onclick="criarProposta()">Criar proposta</button>
+        </div>
+
+        <div id="propostasLista" class="list-box">
+          <p class="placeholder">Nenhuma proposta carregada.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Resultado técnico</h2>
+      </div>
+      <pre id="resultadoTecnico">Pronto para uso.</pre>
+    </section>
   </div>
 
   <script>
-    const API_URL = "backend-facil-production.up.railway.app";
+    const API_URL = "https://backend-facil-production.up.railway.app/";
+
+    function setTheme(theme) {
+      document.body.setAttribute("data-theme", theme);
+      localStorage.setItem("zapflow-theme", theme);
+    }
+
+    function loadTheme() {
+      const saved = localStorage.getItem("zapflow-theme") || "light";
+      document.body.setAttribute("data-theme", saved);
+    }
+
+    function setTechnicalResult(data) {
+      document.getElementById("resultadoTecnico").textContent = JSON.stringify(data, null, 2);
+    }
 
     async function fazerLogin() {
       const res = await fetch(API_URL + "/login");
       const data = await res.json();
       document.getElementById("loginResultado").textContent = JSON.stringify(data, null, 2);
+      setTechnicalResult(data);
     }
 
     async function listarLeads() {
       const res = await fetch(API_URL + "/leads");
       const data = await res.json();
-      document.getElementById("leadsResultado").textContent = JSON.stringify(data, null, 2);
+      renderLeads(data.items || []);
+      setTechnicalResult(data);
     }
 
     async function criarLead() {
+      const payload = {
+        name: document.getElementById("leadName").value || "Novo lead",
+        project: document.getElementById("leadProject").value || "Novo projeto",
+        city: document.getElementById("leadCity").value || "Não informado",
+        source: document.getElementById("leadSource").value || "WhatsApp",
+        budget: document.getElementById("leadBudget").value || "R$ 0,00",
+        stage: "Novo lead",
+        nextAction: "Responder em até 15 min",
+        temperature: "Quente"
+      };
+
       const res = await fetch(API_URL + "/leads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          name: "Lead Teste",
-          project: "Projeto Teste",
-          city: "Gravataí",
-          source: "WhatsApp",
-          budget: "R$ 12.000",
-          stage: "Novo lead",
-          nextAction: "Responder hoje",
-          temperature: "Quente"
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
-      document.getElementById("leadsResultado").textContent = JSON.stringify(data, null, 2);
+      setTechnicalResult(data);
+      listarLeads();
+
+      document.getElementById("leadName").value = "";
+      document.getElementById("leadProject").value = "";
+      document.getElementById("leadCity").value = "";
+      document.getElementById("leadSource").value = "";
+      document.getElementById("leadBudget").value = "";
     }
 
     async function listarPropostas() {
       const res = await fetch(API_URL + "/proposals");
       const data = await res.json();
-      document.getElementById("propostasResultado").textContent = JSON.stringify(data, null, 2);
+      renderProposals(data.items || []);
+      setTechnicalResult(data);
     }
 
     async function criarProposta() {
+      const payload = {
+        client: document.getElementById("proposalClient").value || "Cliente não informado",
+        title: document.getElementById("proposalTitle").value || "Nova proposta",
+        value: document.getElementById("proposalValue").value || "R$ 0,00",
+        status: "Em montagem"
+      };
+
       const res = await fetch(API_URL + "/proposals", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          client: "Lead Teste",
-          title: "Proposta Teste",
-          value: "R$ 8.000",
-          status: "Em montagem"
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
-      document.getElementById("propostasResultado").textContent = JSON.stringify(data, null, 2);
+      setTechnicalResult(data);
+      listarPropostas();
+
+      document.getElementById("proposalClient").value = "";
+      document.getElementById("proposalTitle").value = "";
+      document.getElementById("proposalValue").value = "";
     }
+
+    function renderLeads(items) {
+      const container = document.getElementById("leadsLista");
+
+      if (!items.length) {
+        container.innerHTML = '<p class="placeholder">Nenhum lead encontrado.</p>';
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div class="item-card">
+          <div class="item-top">
+            <strong>${item.name}</strong>
+            <span class="badge">${item.stage}</span>
+          </div>
+          <div class="item-line">${item.project}</div>
+          <div class="item-line">Cidade: ${item.city}</div>
+          <div class="item-line">Origem: ${item.source}</div>
+          <div class="item-line">Orçamento: ${item.budget}</div>
+          <div class="item-line muted">Próxima ação: ${item.nextAction}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderProposals(items) {
+      const container = document.getElementById("propostasLista");
+
+      if (!items.length) {
+        container.innerHTML = '<p class="placeholder">Nenhuma proposta encontrada.</p>';
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div class="item-card">
+          <div class="item-top">
+            <strong>${item.title}</strong>
+            <span class="badge">${item.status}</span>
+          </div>
+          <div class="item-line">Cliente: ${item.client}</div>
+          <div class="item-line">Valor: ${item.value}</div>
+        </div>
+      `).join("");
+    }
+
+    loadTheme();
+    listarLeads();
+    listarPropostas();
   </script>
 </body>
 </html>
