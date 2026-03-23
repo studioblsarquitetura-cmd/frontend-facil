@@ -134,6 +134,46 @@
 
     <section class="card">
       <div class="card-header">
+        <h2>Onboarding guiado do WhatsApp</h2>
+      </div>
+
+      <div class="list-box">
+        <div class="item-card">
+          <div class="item-top">
+            <strong>Passo 1</strong>
+            <span class="badge">Meta</span>
+          </div>
+          <div class="item-line">Crie seu app na Meta e ative o produto WhatsApp.</div>
+        </div>
+
+        <div class="item-card">
+          <div class="item-top">
+            <strong>Passo 2</strong>
+            <span class="badge">API Setup</span>
+          </div>
+          <div class="item-line">Copie o Access Token e o Phone Number ID na tela de configuração da API.</div>
+        </div>
+
+        <div class="item-card">
+          <div class="item-top">
+            <strong>Passo 3</strong>
+            <span class="badge">Webhook</span>
+          </div>
+          <div class="item-line">Defina um Verify Token e configure o callback do webhook usando seu backend.</div>
+        </div>
+
+        <div class="item-card">
+          <div class="item-top">
+            <strong>Passo 4</strong>
+            <span class="badge">Painel</span>
+          </div>
+          <div class="item-line">Cole os dados abaixo, salve e teste a conexão antes de enviar mensagens.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
         <h2>Configurações do usuário</h2>
         <button onclick="carregarSettings()">Carregar configurações</button>
       </div>
@@ -143,6 +183,15 @@
         <input id="settingsWhatsappPhoneNumberId" type="text" placeholder="WhatsApp Phone Number ID" />
         <input id="settingsWhatsappVerifyToken" type="text" placeholder="WhatsApp Verify Token" />
         <button onclick="salvarSettings()">Salvar configurações</button>
+        <button onclick="testarConexaoWhatsApp()">Testar conexão WhatsApp</button>
+      </div>
+
+      <div class="item-card">
+        <div class="item-top">
+          <strong>Status da conexão</strong>
+          <span class="badge" id="whatsappConnectionStatus">Não testado</span>
+        </div>
+        <div class="item-line muted" id="whatsappConnectionMessage">Preencha suas credenciais e clique em testar conexão.</div>
       </div>
 
       <pre id="settingsResult">Aguardando configurações.</pre>
@@ -380,6 +429,11 @@
       if (el) el.textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
     }
 
+    function setWhatsappStatus(label, message) {
+      document.getElementById("whatsappConnectionStatus").textContent = label;
+      document.getElementById("whatsappConnectionMessage").textContent = message;
+    }
+
     function showLogin() {
       document.getElementById("loginScreen").style.display = "block";
       document.getElementById("appScreen").style.display = "none";
@@ -481,6 +535,13 @@
         document.getElementById("settingsWhatsappVerifyToken").value = item.whatsappVerifyToken || "";
 
         setSettingsResult(data);
+
+        if (item.whatsappAccessToken && item.whatsappPhoneNumberId) {
+          setWhatsappStatus("Configurado", "Credenciais preenchidas. Agora teste a conexão.");
+        } else {
+          setWhatsappStatus("Incompleto", "Ainda faltam credenciais para testar.");
+        }
+
         setSystemMessage("Configurações carregadas com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao carregar configurações" });
@@ -509,14 +570,50 @@
         setSettingsResult(data);
 
         if (!res.ok) {
+          setWhatsappStatus("Erro", data.error || "Não foi possível salvar.");
           setSystemMessage(data.error || "Erro ao salvar configurações.");
           return;
         }
 
+        setWhatsappStatus("Salvo", "Configurações salvas. Agora clique em testar conexão.");
         setSystemMessage("Configurações salvas com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao salvar configurações" });
+        setWhatsappStatus("Erro", "Falha ao salvar configurações.");
         setSystemMessage("Erro ao salvar configurações.");
+      }
+    }
+
+    async function testarConexaoWhatsApp() {
+      setSystemMessage("Testando conexão do WhatsApp...");
+      setWhatsappStatus("Testando", "Validando credenciais com a Meta...");
+
+      try {
+        const res = await fetch(API_URL + "/settings/test-whatsapp", {
+          method: "POST",
+          headers: authHeaders()
+        });
+
+        const data = await res.json();
+        setTechnicalResult(data);
+        setSettingsResult(data);
+
+        if (!res.ok) {
+          setWhatsappStatus("Erro", data.detail || data.error || "Falha ao testar conexão.");
+          setSystemMessage(data.detail || data.error || "Erro ao testar conexão.");
+          return;
+        }
+
+        const info = data.item || {};
+        const phone = info.display_phone_number || "Número não informado";
+        const name = info.verified_name || "Conta sem nome verificado";
+
+        setWhatsappStatus("Conectado", `${name} • ${phone}`);
+        setSystemMessage("Conexão com WhatsApp validada com sucesso.");
+      } catch (error) {
+        setTechnicalResult({ ok: false, error: "Erro ao testar conexão WhatsApp" });
+        setWhatsappStatus("Erro", "Falha ao testar conexão com WhatsApp.");
+        setSystemMessage("Erro ao testar conexão com WhatsApp.");
       }
     }
 
