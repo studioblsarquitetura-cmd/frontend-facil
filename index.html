@@ -323,6 +323,35 @@
     </div>
 
     <div class="tab-content" id="tab-configuracoes">
+      <section class="grid stats-grid">
+        <div class="card stat-card">
+          <span>Plano atual</span>
+          <strong id="accountPlan">-</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Status da conta</span>
+          <strong id="accountStatus">-</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Trial até</span>
+          <strong id="accountTrialEndsAt">-</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Acesso até</span>
+          <strong id="accountAccessExpiresAt">-</strong>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Status do acesso</h2>
+        </div>
+        <pre id="accountMessage">Carregando informações da conta.</pre>
+      </section>
+
       <section class="card">
         <div class="card-header">
           <h2>Onboarding guiado do WhatsApp</h2>
@@ -488,6 +517,13 @@
       return registerReal();
     }
 
+    function formatDateBr(value) {
+      if (!value) return "-";
+      const d = new Date(value);
+      if (isNaN(d.getTime())) return "-";
+      return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    }
+
     function setTechnicalResult(data) {
       const el = document.getElementById("resultadoTecnico");
       if (el) el.textContent = JSON.stringify(data, null, 2);
@@ -506,6 +542,35 @@
     function setWhatsappStatus(label, message) {
       document.getElementById("whatsappConnectionStatus").textContent = label;
       document.getElementById("whatsappConnectionMessage").textContent = message;
+    }
+
+    function updateAccountUI(account) {
+      if (!account) return;
+
+      document.getElementById("accountPlan").textContent = account.plan || "-";
+      document.getElementById("accountStatus").textContent = account.accessStatus || "-";
+      document.getElementById("accountTrialEndsAt").textContent = formatDateBr(account.trialEndsAt);
+      document.getElementById("accountAccessExpiresAt").textContent = formatDateBr(account.accessExpiresAt);
+
+      let message = "Conta carregada com sucesso.";
+
+      if (account.accessStatus === "trialing") {
+        message = `Sua conta está em período de teste até ${formatDateBr(account.trialEndsAt)}.`;
+      } else if (account.accessStatus === "active") {
+        if (account.accessExpiresAt) {
+          message = `Seu acesso está ativo até ${formatDateBr(account.accessExpiresAt)}.`;
+        } else {
+          message = "Seu acesso está ativo.";
+        }
+      } else if (account.accessStatus === "past_due") {
+        message = "Seu acesso está pendente de renovação.";
+      } else if (account.accessStatus === "blocked") {
+        message = "Seu acesso está bloqueado.";
+      } else if (account.accessStatus === "canceled") {
+        message = "Sua assinatura foi cancelada.";
+      }
+
+      document.getElementById("accountMessage").textContent = message;
     }
 
     function showLogin() {
@@ -573,10 +638,31 @@
         setToken(data.token);
         document.getElementById("loggedUser").textContent = data.user.name;
         document.getElementById("authInfo").textContent = JSON.stringify(data.user, null, 2);
+        if (data.account) updateAccountUI(data.account);
         showApp();
         await carregarSistema();
       } catch (error) {
         document.getElementById("authMessage").textContent = "Erro ao entrar";
+      }
+    }
+
+    async function carregarAccount() {
+      try {
+        const res = await fetch(API_URL + "/account", {
+          headers: {
+            "Authorization": "Bearer " + getToken()
+          }
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          document.getElementById("accountMessage").textContent = data.error || "Erro ao carregar conta.";
+          return;
+        }
+
+        updateAccountUI(data.account);
+      } catch (error) {
+        document.getElementById("accountMessage").textContent = "Erro ao carregar conta.";
       }
     }
 
@@ -604,6 +690,7 @@
 
         document.getElementById("loggedUser").textContent = data.user.name || data.user.email;
         document.getElementById("authInfo").textContent = JSON.stringify(data.user, null, 2);
+        if (data.account) updateAccountUI(data.account);
         showApp();
         await carregarSistema();
       } catch (error) {
@@ -1302,6 +1389,7 @@
 
     async function carregarSistema() {
       await testarBackend();
+      await carregarAccount();
       await carregarSettings();
       await listarLeads();
       await listarPropostas();
