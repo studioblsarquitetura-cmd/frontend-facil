@@ -92,6 +92,35 @@
 
     <section class="card">
       <div class="card-header">
+        <h2>Kanban de Leads</h2>
+        <button onclick="listarLeads()">Atualizar kanban</button>
+      </div>
+
+      <div id="kanbanBoard" class="kanban-board">
+        <div class="kanban-column">
+          <div class="kanban-title">Novo lead</div>
+          <div id="kanbanNovoLead" class="kanban-list"></div>
+        </div>
+
+        <div class="kanban-column">
+          <div class="kanban-title">Reunião agendada</div>
+          <div id="kanbanReuniao" class="kanban-list"></div>
+        </div>
+
+        <div class="kanban-column">
+          <div class="kanban-title">Proposta enviada</div>
+          <div id="kanbanProposta" class="kanban-list"></div>
+        </div>
+
+        <div class="kanban-column">
+          <div class="kanban-title">Fechado</div>
+          <div id="kanbanFechado" class="kanban-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
         <h2>Alertas do sistema</h2>
       </div>
       <pre id="systemMessage">Sistema carregado.</pre>
@@ -294,15 +323,45 @@
 
       document.getElementById("funnelNovoLead").textContent =
         leads.filter(item => item.stage === "Novo lead").length;
-
       document.getElementById("funnelReuniao").textContent =
         leads.filter(item => item.stage === "Reunião agendada").length;
-
       document.getElementById("funnelProposta").textContent =
         leads.filter(item => item.stage === "Proposta enviada").length;
-
       document.getElementById("funnelFechado").textContent =
         leads.filter(item => item.stage === "Fechado").length;
+    }
+
+    function renderKanban(leads) {
+      const novo = document.getElementById("kanbanNovoLead");
+      const reuniao = document.getElementById("kanbanReuniao");
+      const proposta = document.getElementById("kanbanProposta");
+      const fechado = document.getElementById("kanbanFechado");
+
+      novo.innerHTML = "";
+      reuniao.innerHTML = "";
+      proposta.innerHTML = "";
+      fechado.innerHTML = "";
+
+      const renderCard = (item) => `
+        <div class="item-card">
+          <div class="item-top">
+            <strong>${item.name}</strong>
+            <span class="badge">${item.temperature}</span>
+          </div>
+          <div class="item-line">${item.project}</div>
+          <div class="item-line muted">${item.city}</div>
+        </div>
+      `;
+
+      const novos = leads.filter(item => item.stage === "Novo lead");
+      const reunioes = leads.filter(item => item.stage === "Reunião agendada");
+      const propostas = leads.filter(item => item.stage === "Proposta enviada");
+      const fechados = leads.filter(item => item.stage === "Fechado");
+
+      novo.innerHTML = novos.length ? novos.map(renderCard).join("") : '<p class="placeholder">Sem leads</p>';
+      reuniao.innerHTML = reunioes.length ? reunioes.map(renderCard).join("") : '<p class="placeholder">Sem leads</p>';
+      proposta.innerHTML = propostas.length ? propostas.map(renderCard).join("") : '<p class="placeholder">Sem leads</p>';
+      fechado.innerHTML = fechados.length ? fechados.map(renderCard).join("") : '<p class="placeholder">Sem leads</p>';
     }
 
     function aplicarFiltros() {
@@ -324,6 +383,7 @@
 
       renderLeads(filteredLeads);
       renderProposals(filteredProposals);
+      renderKanban(allLeads);
       atualizarDashboard(allLeads, allProposals);
     }
 
