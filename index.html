@@ -126,14 +126,6 @@
       <pre id="systemMessage">Sistema carregado.</pre>
     </section>
 
-    <section class="card">
-      <div class="card-header">
-        <h2>Login</h2>
-        <button onclick="fazerLogin()">Testar login</button>
-      </div>
-      <pre id="loginResultado">Aguardando...</pre>
-    </section>
-
     <section class="grid main-grid">
       <section class="card">
         <div class="card-header">
@@ -182,6 +174,7 @@
           </select>
 
           <input id="leadNextAction" type="text" placeholder="Próxima ação" />
+          <textarea id="leadNotes" placeholder="Observações do lead"></textarea>
 
           <button onclick="salvarLead()">Salvar lead</button>
           <button onclick="limparCamposLead()">Limpar campos</button>
@@ -213,12 +206,16 @@
           <input id="proposalClient" type="text" placeholder="Cliente" />
           <input id="proposalTitle" type="text" placeholder="Título da proposta" />
           <input id="proposalValue" type="text" placeholder="Valor" />
+
           <select id="proposalStatus">
             <option value="Em montagem">Em montagem</option>
             <option value="Enviada">Enviada</option>
             <option value="Aprovada">Aprovada</option>
             <option value="Recusada">Recusada</option>
           </select>
+
+          <textarea id="proposalNote" placeholder="Observação da proposta"></textarea>
+
           <button onclick="salvarProposta()">Salvar proposta</button>
           <button onclick="limparCamposProposta()">Limpar campos</button>
         </div>
@@ -227,6 +224,14 @@
           <p class="placeholder">Nenhuma proposta carregada.</p>
         </div>
       </section>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Login</h2>
+        <button onclick="fazerLogin()">Testar login</button>
+      </div>
+      <pre id="loginResultado">Aguardando...</pre>
     </section>
 
     <section class="card">
@@ -271,6 +276,7 @@
       document.getElementById("leadStage").value = "Novo lead";
       document.getElementById("leadTemperature").value = "Quente";
       document.getElementById("leadNextAction").value = "";
+      document.getElementById("leadNotes").value = "";
       setSystemMessage("Campos de lead limpos.");
     }
 
@@ -280,6 +286,7 @@
       document.getElementById("proposalTitle").value = "";
       document.getElementById("proposalValue").value = "";
       document.getElementById("proposalStatus").value = "Em montagem";
+      document.getElementById("proposalNote").value = "";
       setSystemMessage("Campos de proposta limpos.");
     }
 
@@ -293,6 +300,7 @@
       document.getElementById("leadStage").value = item.stage;
       document.getElementById("leadTemperature").value = item.temperature;
       document.getElementById("leadNextAction").value = item.nextAction;
+      document.getElementById("leadNotes").value = item.notes || "";
       setSystemMessage("Lead carregado para edição.");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -303,6 +311,7 @@
       document.getElementById("proposalTitle").value = item.title;
       document.getElementById("proposalValue").value = item.value;
       document.getElementById("proposalStatus").value = item.status;
+      document.getElementById("proposalNote").value = item.note || "";
       setSystemMessage("Proposta carregada para edição.");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -310,25 +319,15 @@
     function atualizarDashboard(leads, proposals) {
       document.getElementById("totalLeads").textContent = leads.length;
       document.getElementById("totalPropostas").textContent = proposals.length;
-      document.getElementById("propostasMontagem").textContent =
-        proposals.filter(item => item.status === "Em montagem").length;
-      document.getElementById("propostasEnviadas").textContent =
-        proposals.filter(item => item.status === "Enviada").length;
-      document.getElementById("leadsQuentes").textContent =
-        leads.filter(item => item.temperature === "Quente").length;
-      document.getElementById("leadsMornos").textContent =
-        leads.filter(item => item.temperature === "Morno").length;
-      document.getElementById("leadsFrios").textContent =
-        leads.filter(item => item.temperature === "Frio").length;
-
-      document.getElementById("funnelNovoLead").textContent =
-        leads.filter(item => item.stage === "Novo lead").length;
-      document.getElementById("funnelReuniao").textContent =
-        leads.filter(item => item.stage === "Reunião agendada").length;
-      document.getElementById("funnelProposta").textContent =
-        leads.filter(item => item.stage === "Proposta enviada").length;
-      document.getElementById("funnelFechado").textContent =
-        leads.filter(item => item.stage === "Fechado").length;
+      document.getElementById("propostasMontagem").textContent = proposals.filter(item => item.status === "Em montagem").length;
+      document.getElementById("propostasEnviadas").textContent = proposals.filter(item => item.status === "Enviada").length;
+      document.getElementById("leadsQuentes").textContent = leads.filter(item => item.temperature === "Quente").length;
+      document.getElementById("leadsMornos").textContent = leads.filter(item => item.temperature === "Morno").length;
+      document.getElementById("leadsFrios").textContent = leads.filter(item => item.temperature === "Frio").length;
+      document.getElementById("funnelNovoLead").textContent = leads.filter(item => item.stage === "Novo lead").length;
+      document.getElementById("funnelReuniao").textContent = leads.filter(item => item.stage === "Reunião agendada").length;
+      document.getElementById("funnelProposta").textContent = leads.filter(item => item.stage === "Proposta enviada").length;
+      document.getElementById("funnelFechado").textContent = leads.filter(item => item.stage === "Fechado").length;
     }
 
     function renderKanban(leads) {
@@ -350,6 +349,10 @@
           </div>
           <div class="item-line">${item.project}</div>
           <div class="item-line muted">${item.city}</div>
+          <div class="kanban-actions">
+            <button onclick="voltarLead(${item.id})">←</button>
+            <button onclick="avancarLead(${item.id})">→</button>
+          </div>
         </div>
       `;
 
@@ -449,7 +452,8 @@
           budget: document.getElementById("leadBudget").value.trim() || "R$ 0,00",
           stage: document.getElementById("leadStage").value,
           temperature: document.getElementById("leadTemperature").value,
-          nextAction: document.getElementById("leadNextAction").value.trim() || "Responder em até 15 min"
+          nextAction: document.getElementById("leadNextAction").value.trim() || "Responder em até 15 min",
+          notes: document.getElementById("leadNotes").value.trim()
         };
 
         if (!payload.name || !payload.project || !payload.city) {
@@ -493,7 +497,8 @@
           budget: document.getElementById("leadBudget").value.trim(),
           stage: document.getElementById("leadStage").value,
           temperature: document.getElementById("leadTemperature").value,
-          nextAction: document.getElementById("leadNextAction").value.trim()
+          nextAction: document.getElementById("leadNextAction").value.trim(),
+          notes: document.getElementById("leadNotes").value.trim()
         };
 
         const res = await fetch(API_URL + "/leads/" + id, {
@@ -516,6 +521,34 @@
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao editar lead" });
         setSystemMessage("Erro ao editar lead.");
+      }
+    }
+
+    async function avancarLead(id) {
+      try {
+        const res = await fetch(API_URL + "/leads/" + id + "/advance", {
+          method: "POST"
+        });
+        const data = await res.json();
+        setTechnicalResult(data);
+        await listarLeads();
+        setSystemMessage("Lead avançado no funil.");
+      } catch (error) {
+        setSystemMessage("Erro ao avançar lead.");
+      }
+    }
+
+    async function voltarLead(id) {
+      try {
+        const res = await fetch(API_URL + "/leads/" + id + "/back", {
+          method: "POST"
+        });
+        const data = await res.json();
+        setTechnicalResult(data);
+        await listarLeads();
+        setSystemMessage("Lead voltou uma etapa.");
+      } catch (error) {
+        setSystemMessage("Erro ao voltar lead.");
       }
     }
 
@@ -571,7 +604,8 @@
           client: document.getElementById("proposalClient").value.trim(),
           title: document.getElementById("proposalTitle").value.trim(),
           value: document.getElementById("proposalValue").value.trim(),
-          status: document.getElementById("proposalStatus").value
+          status: document.getElementById("proposalStatus").value,
+          note: document.getElementById("proposalNote").value.trim()
         };
 
         if (!payload.client || !payload.title || !payload.value) {
@@ -611,7 +645,8 @@
           client: document.getElementById("proposalClient").value.trim(),
           title: document.getElementById("proposalTitle").value.trim(),
           value: document.getElementById("proposalValue").value.trim(),
-          status: document.getElementById("proposalStatus").value
+          status: document.getElementById("proposalStatus").value,
+          note: document.getElementById("proposalNote").value.trim()
         };
 
         const res = await fetch(API_URL + "/proposals/" + id, {
@@ -680,6 +715,7 @@
           <div class="item-line">Orçamento: ${item.budget}</div>
           <div class="item-line">Temperatura: ${item.temperature}</div>
           <div class="item-line muted">Próxima ação: ${item.nextAction}</div>
+          <div class="item-line muted">Observações: ${item.notes || "Sem observações"}</div>
           <button onclick='preencherLead(${JSON.stringify(item)})'>Editar lead</button>
           <button onclick="excluirLead(${item.id})">Excluir lead</button>
         </div>
@@ -702,6 +738,8 @@
           </div>
           <div class="item-line">Cliente: ${item.client}</div>
           <div class="item-line">Valor: ${item.value}</div>
+          <div class="item-line">Data: ${item.createdAt || "Sem data"}</div>
+          <div class="item-line muted">Observação: ${item.note || "Sem observação"}</div>
           <button onclick='preencherProposta(${JSON.stringify(item)})'>Editar proposta</button>
           <button onclick="excluirProposta(${item.id})">Excluir proposta</button>
         </div>
