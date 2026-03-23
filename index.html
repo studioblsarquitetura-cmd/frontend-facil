@@ -20,16 +20,60 @@
       </div>
     </header>
 
-    <section class="card">
-      <div class="card-header">
-        <h2>Login</h2>
-        <button onclick="fazerLogin()">Testar login</button>
+    <nav class="tabs">
+      <button class="tab active" onclick="showTab('dashboard', event)">Dashboard</button>
+      <button class="tab" onclick="showTab('leads', event)">Leads</button>
+      <button class="tab" onclick="showTab('propostas', event)">Propostas</button>
+      <button class="tab" onclick="showTab('config', event)">Configurações</button>
+    </nav>
+
+    <section id="tab-dashboard" class="tab-content active">
+      <div class="grid stats-grid">
+        <div class="card stat-card">
+          <h3>Total de Leads</h3>
+          <p id="totalLeads">0</p>
+        </div>
+
+        <div class="card stat-card">
+          <h3>Total de Propostas</h3>
+          <p id="totalPropostas">0</p>
+        </div>
+
+        <div class="card stat-card">
+          <h3>Propostas Enviadas</h3>
+          <p id="propostasEnviadas">0</p>
+        </div>
+
+        <div class="card stat-card">
+          <h3>Último Login</h3>
+          <p id="ultimoLogin">Ainda não testado</p>
+        </div>
       </div>
-      <pre id="loginResultado">Aguardando...</pre>
+
+      <div class="grid">
+        <section class="card">
+          <div class="card-header">
+            <h2>Resumo dos Leads</h2>
+            <button onclick="carregarDashboard()">Atualizar dashboard</button>
+          </div>
+          <div id="dashboardLeads" class="list-box">
+            <p class="placeholder">Carregando resumo...</p>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2>Resumo das Propostas</h2>
+          </div>
+          <div id="dashboardPropostas" class="list-box">
+            <p class="placeholder">Carregando resumo...</p>
+          </div>
+        </section>
+      </div>
     </section>
 
-    <section class="grid">
-      <div class="card">
+    <section id="tab-leads" class="tab-content">
+      <section class="card">
         <div class="card-header">
           <h2>Leads</h2>
           <div class="actions">
@@ -49,9 +93,11 @@
         <div id="leadsLista" class="list-box">
           <p class="placeholder">Nenhum lead carregado.</p>
         </div>
-      </div>
+      </section>
+    </section>
 
-      <div class="card">
+    <section id="tab-propostas" class="tab-content">
+      <section class="card">
         <div class="card-header">
           <h2>Propostas</h2>
           <div class="actions">
@@ -69,14 +115,35 @@
         <div id="propostasLista" class="list-box">
           <p class="placeholder">Nenhuma proposta carregada.</p>
         </div>
-      </div>
+      </section>
     </section>
 
-    <section class="card">
-      <div class="card-header">
-        <h2>Resultado técnico</h2>
-      </div>
-      <pre id="resultadoTecnico">Pronto para uso.</pre>
+    <section id="tab-config" class="tab-content">
+      <section class="card">
+        <div class="card-header">
+          <h2>Configurações</h2>
+        </div>
+
+        <div class="config-grid">
+          <div class="config-box">
+            <h3>Teste de Login</h3>
+            <button onclick="fazerLogin()">Executar login demo</button>
+            <pre id="loginResultado">Aguardando...</pre>
+          </div>
+
+          <div class="config-box">
+            <h3>Backend atual</h3>
+            <pre id="backendInfo">Aguardando...</pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Resultado técnico</h2>
+        </div>
+        <pre id="resultadoTecnico">Pronto para uso.</pre>
+      </section>
     </section>
   </div>
 
@@ -93,14 +160,34 @@
       document.body.setAttribute("data-theme", saved);
     }
 
+    function showTab(tabName, event) {
+      document.querySelectorAll(".tab-content").forEach(tab => {
+        tab.classList.remove("active");
+      });
+
+      document.querySelectorAll(".tab").forEach(tab => {
+        tab.classList.remove("active");
+      });
+
+      document.getElementById("tab-" + tabName).classList.add("active");
+      event.target.classList.add("active");
+    }
+
     function setTechnicalResult(data) {
       document.getElementById("resultadoTecnico").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function carregarBackendInfo() {
+      const res = await fetch(API_URL + "/");
+      const data = await res.json();
+      document.getElementById("backendInfo").textContent = JSON.stringify(data, null, 2);
     }
 
     async function fazerLogin() {
       const res = await fetch(API_URL + "/login");
       const data = await res.json();
       document.getElementById("loginResultado").textContent = JSON.stringify(data, null, 2);
+      document.getElementById("ultimoLogin").textContent = "Login demo executado";
       setTechnicalResult(data);
     }
 
@@ -108,6 +195,7 @@
       const res = await fetch(API_URL + "/leads");
       const data = await res.json();
       renderLeads(data.items || []);
+      atualizarDashboardLeads(data.items || []);
       setTechnicalResult(data);
     }
 
@@ -146,6 +234,7 @@
       const res = await fetch(API_URL + "/proposals");
       const data = await res.json();
       renderProposals(data.items || []);
+      atualizarDashboardPropostas(data.items || []);
       setTechnicalResult(data);
     }
 
@@ -217,9 +306,60 @@
       `).join("");
     }
 
+    function atualizarDashboardLeads(items) {
+      document.getElementById("totalLeads").textContent = items.length;
+
+      const dashboard = document.getElementById("dashboardLeads");
+
+      if (!items.length) {
+        dashboard.innerHTML = '<p class="placeholder">Nenhum lead encontrado.</p>';
+        return;
+      }
+
+      dashboard.innerHTML = items.slice(0, 5).map(item => `
+        <div class="item-card">
+          <div class="item-top">
+            <strong>${item.name}</strong>
+            <span class="badge">${item.temperature}</span>
+          </div>
+          <div class="item-line">${item.project}</div>
+          <div class="item-line muted">${item.city} • ${item.source}</div>
+        </div>
+      `).join("");
+    }
+
+    function atualizarDashboardPropostas(items) {
+      document.getElementById("totalPropostas").textContent = items.length;
+      document.getElementById("propostasEnviadas").textContent =
+        items.filter(item => item.status === "Enviada").length;
+
+      const dashboard = document.getElementById("dashboardPropostas");
+
+      if (!items.length) {
+        dashboard.innerHTML = '<p class="placeholder">Nenhuma proposta encontrada.</p>';
+        return;
+      }
+
+      dashboard.innerHTML = items.slice(0, 5).map(item => `
+        <div class="item-card">
+          <div class="item-top">
+            <strong>${item.title}</strong>
+            <span class="badge">${item.status}</span>
+          </div>
+          <div class="item-line">${item.client}</div>
+          <div class="item-line muted">${item.value}</div>
+        </div>
+      `).join("");
+    }
+
+    async function carregarDashboard() {
+      await listarLeads();
+      await listarPropostas();
+      await carregarBackendInfo();
+    }
+
     loadTheme();
-    listarLeads();
-    listarPropostas();
+    carregarDashboard();
   </script>
 </body>
 </html>
