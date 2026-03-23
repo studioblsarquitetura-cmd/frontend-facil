@@ -48,220 +48,173 @@
       </div>
     </header>
 
-    <section class="grid stats-grid">
-      <div class="card stat-card">
-        <span>Total de Leads</span>
-        <strong id="totalLeads">0</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Total de Propostas</span>
-        <strong id="totalPropostas">0</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Em Montagem</span>
-        <strong id="propostasMontagem">0</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Propostas Enviadas</span>
-        <strong id="propostasEnviadas">0</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Leads Quentes</span>
-        <strong id="leadsQuentes">0</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Leads Mornos</span>
-        <strong id="leadsMornos">0</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Leads Frios</span>
-        <strong id="leadsFrios">0</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Status Backend</span>
-        <strong id="statusBackend">Aguardando</strong>
-      </div>
-    </section>
-
-    <section class="grid stats-grid">
-      <div class="card stat-card">
-        <span>Valor Total Propostas</span>
-        <strong id="commercialTotalValue">R$ 0,00</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Aprovadas</span>
-        <strong id="commercialApproved">0</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Recusadas</span>
-        <strong id="commercialRefused">0</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Taxa Aprovação</span>
-        <strong id="commercialApprovalRate">0%</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Taxa Recusa</span>
-        <strong id="commercialRefusalRate">0%</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Enviadas</span>
-        <strong id="commercialSent">0</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Total Comercial</span>
-        <strong id="commercialTotalCount">0</strong>
-      </div>
-
-      <div class="card stat-card">
-        <span>Usuário</span>
-        <strong id="loggedUser">-</strong>
-      </div>
-    </section>
-
     <section class="card">
-      <div class="card-header">
-        <h2>Onboarding guiado do WhatsApp</h2>
-      </div>
-
-      <div class="list-box">
-        <div class="item-card">
-          <div class="item-top">
-            <strong>Passo 1</strong>
-            <span class="badge">Meta</span>
-          </div>
-          <div class="item-line">Crie seu app na Meta e ative o produto WhatsApp.</div>
-        </div>
-
-        <div class="item-card">
-          <div class="item-top">
-            <strong>Passo 2</strong>
-            <span class="badge">API Setup</span>
-          </div>
-          <div class="item-line">Copie o Access Token e o Phone Number ID na tela de configuração da API.</div>
-        </div>
-
-        <div class="item-card">
-          <div class="item-top">
-            <strong>Passo 3</strong>
-            <span class="badge">Webhook</span>
-          </div>
-          <div class="item-line">Defina um Verify Token e configure o callback do webhook usando seu backend.</div>
-        </div>
-
-        <div class="item-card">
-          <div class="item-top">
-            <strong>Passo 4</strong>
-            <span class="badge">Painel</span>
-          </div>
-          <div class="item-line">Cole os dados abaixo, salve e teste a conexão antes de enviar mensagens.</div>
-        </div>
+      <div class="tabs-nav">
+        <button class="tab-button active" id="tabBtn-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+        <button class="tab-button" id="tabBtn-leads" onclick="switchTab('leads')">Leads</button>
+        <button class="tab-button" id="tabBtn-propostas" onclick="switchTab('propostas')">Propostas</button>
+        <button class="tab-button" id="tabBtn-configuracoes" onclick="switchTab('configuracoes')">Configurações</button>
       </div>
     </section>
 
-    <section class="card">
-      <div class="card-header">
-        <h2>Configurações do usuário</h2>
-        <button onclick="carregarSettings()">Carregar configurações</button>
-      </div>
-
-      <div class="form">
-        <input id="settingsWhatsappAccessToken" type="text" placeholder="WhatsApp Access Token" />
-        <input id="settingsWhatsappPhoneNumberId" type="text" placeholder="WhatsApp Phone Number ID" />
-        <input id="settingsWhatsappVerifyToken" type="text" placeholder="WhatsApp Verify Token" />
-        <button onclick="salvarSettings()">Salvar configurações</button>
-        <button onclick="testarConexaoWhatsApp()">Testar conexão WhatsApp</button>
-      </div>
-
-      <div class="item-card">
-        <div class="item-top">
-          <strong>Status da conexão</strong>
-          <span class="badge" id="whatsappConnectionStatus">Não testado</span>
-        </div>
-        <div class="item-line muted" id="whatsappConnectionMessage">Preencha suas credenciais e clique em testar conexão.</div>
-      </div>
-
-      <pre id="settingsResult">Aguardando configurações.</pre>
-    </section>
-
-    <section class="card">
-      <div class="card-header">
-        <h2>Funil Comercial</h2>
-      </div>
-
-      <div class="grid stats-grid">
+    <div class="tab-content active" id="tab-dashboard">
+      <section class="grid stats-grid">
         <div class="card stat-card">
-          <span>Novo lead</span>
-          <strong id="funnelNovoLead">0</strong>
+          <span>Total de Leads</span>
+          <strong id="totalLeads">0</strong>
         </div>
 
         <div class="card stat-card">
-          <span>Reunião agendada</span>
-          <strong id="funnelReuniao">0</strong>
+          <span>Total de Propostas</span>
+          <strong id="totalPropostas">0</strong>
         </div>
 
         <div class="card stat-card">
-          <span>Proposta enviada</span>
-          <strong id="funnelProposta">0</strong>
+          <span>Em Montagem</span>
+          <strong id="propostasMontagem">0</strong>
         </div>
 
         <div class="card stat-card">
-          <span>Fechado</span>
-          <strong id="funnelFechado">0</strong>
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="card-header">
-        <h2>Kanban de Leads</h2>
-        <button onclick="listarLeads()">Atualizar kanban</button>
-      </div>
-
-      <div id="kanbanBoard" class="kanban-board">
-        <div class="kanban-column">
-          <div class="kanban-title">Novo lead</div>
-          <div id="kanbanNovoLead" class="kanban-list"></div>
+          <span>Propostas Enviadas</span>
+          <strong id="propostasEnviadas">0</strong>
         </div>
 
-        <div class="kanban-column">
-          <div class="kanban-title">Reunião agendada</div>
-          <div id="kanbanReuniao" class="kanban-list"></div>
+        <div class="card stat-card">
+          <span>Leads Quentes</span>
+          <strong id="leadsQuentes">0</strong>
         </div>
 
-        <div class="kanban-column">
-          <div class="kanban-title">Proposta enviada</div>
-          <div id="kanbanProposta" class="kanban-list"></div>
+        <div class="card stat-card">
+          <span>Leads Mornos</span>
+          <strong id="leadsMornos">0</strong>
         </div>
 
-        <div class="kanban-column">
-          <div class="kanban-title">Fechado</div>
-          <div id="kanbanFechado" class="kanban-list"></div>
+        <div class="card stat-card">
+          <span>Leads Frios</span>
+          <strong id="leadsFrios">0</strong>
         </div>
-      </div>
-    </section>
 
-    <section class="card">
-      <div class="card-header">
-        <h2>Alertas do sistema</h2>
-      </div>
-      <pre id="systemMessage">Sistema carregado.</pre>
-    </section>
+        <div class="card stat-card">
+          <span>Status Backend</span>
+          <strong id="statusBackend">Aguardando</strong>
+        </div>
+      </section>
 
-    <section class="grid main-grid">
+      <section class="grid stats-grid">
+        <div class="card stat-card">
+          <span>Valor Total Propostas</span>
+          <strong id="commercialTotalValue">R$ 0,00</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Aprovadas</span>
+          <strong id="commercialApproved">0</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Recusadas</span>
+          <strong id="commercialRefused">0</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Taxa Aprovação</span>
+          <strong id="commercialApprovalRate">0%</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Taxa Recusa</span>
+          <strong id="commercialRefusalRate">0%</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Enviadas</span>
+          <strong id="commercialSent">0</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Total Comercial</span>
+          <strong id="commercialTotalCount">0</strong>
+        </div>
+
+        <div class="card stat-card">
+          <span>Usuário</span>
+          <strong id="loggedUser">-</strong>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Funil Comercial</h2>
+        </div>
+
+        <div class="grid stats-grid">
+          <div class="card stat-card">
+            <span>Novo lead</span>
+            <strong id="funnelNovoLead">0</strong>
+          </div>
+
+          <div class="card stat-card">
+            <span>Reunião agendada</span>
+            <strong id="funnelReuniao">0</strong>
+          </div>
+
+          <div class="card stat-card">
+            <span>Proposta enviada</span>
+            <strong id="funnelProposta">0</strong>
+          </div>
+
+          <div class="card stat-card">
+            <span>Fechado</span>
+            <strong id="funnelFechado">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Kanban de Leads</h2>
+          <button onclick="listarLeads()">Atualizar kanban</button>
+        </div>
+
+        <div id="kanbanBoard" class="kanban-board">
+          <div class="kanban-column">
+            <div class="kanban-title">Novo lead</div>
+            <div id="kanbanNovoLead" class="kanban-list"></div>
+          </div>
+
+          <div class="kanban-column">
+            <div class="kanban-title">Reunião agendada</div>
+            <div id="kanbanReuniao" class="kanban-list"></div>
+          </div>
+
+          <div class="kanban-column">
+            <div class="kanban-title">Proposta enviada</div>
+            <div id="kanbanProposta" class="kanban-list"></div>
+          </div>
+
+          <div class="kanban-column">
+            <div class="kanban-title">Fechado</div>
+            <div id="kanbanFechado" class="kanban-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Alertas do sistema</h2>
+        </div>
+        <pre id="systemMessage">Sistema carregado.</pre>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Resultado técnico</h2>
+        </div>
+        <pre id="resultadoTecnico">Pronto para uso.</pre>
+      </section>
+    </div>
+
+    <div class="tab-content" id="tab-leads">
       <section class="card">
         <div class="card-header">
           <h2>Leads</h2>
@@ -320,7 +273,9 @@
           <p class="placeholder">Nenhum lead carregado.</p>
         </div>
       </section>
+    </div>
 
+    <div class="tab-content" id="tab-propostas">
       <section class="card">
         <div class="card-header">
           <h2>Propostas</h2>
@@ -360,22 +315,82 @@
           <p class="placeholder">Nenhuma proposta carregada.</p>
         </div>
       </section>
-    </section>
+    </div>
 
-    <section class="card">
-      <div class="card-header">
-        <h2>Informações da sessão</h2>
-        <button onclick="validarSessao()">Atualizar sessão</button>
-      </div>
-      <pre id="authInfo">Sessão ativa.</pre>
-    </section>
+    <div class="tab-content" id="tab-configuracoes">
+      <section class="card">
+        <div class="card-header">
+          <h2>Onboarding guiado do WhatsApp</h2>
+        </div>
 
-    <section class="card">
-      <div class="card-header">
-        <h2>Resultado técnico</h2>
-      </div>
-      <pre id="resultadoTecnico">Pronto para uso.</pre>
-    </section>
+        <div class="list-box">
+          <div class="item-card">
+            <div class="item-top">
+              <strong>Passo 1</strong>
+              <span class="badge">Meta</span>
+            </div>
+            <div class="item-line">Crie seu app na Meta e ative o produto WhatsApp.</div>
+          </div>
+
+          <div class="item-card">
+            <div class="item-top">
+              <strong>Passo 2</strong>
+              <span class="badge">API Setup</span>
+            </div>
+            <div class="item-line">Copie o Access Token e o Phone Number ID na tela de configuração da API.</div>
+          </div>
+
+          <div class="item-card">
+            <div class="item-top">
+              <strong>Passo 3</strong>
+              <span class="badge">Webhook</span>
+            </div>
+            <div class="item-line">Defina um Verify Token e configure o callback do webhook usando seu backend.</div>
+          </div>
+
+          <div class="item-card">
+            <div class="item-top">
+              <strong>Passo 4</strong>
+              <span class="badge">Painel</span>
+            </div>
+            <div class="item-line">Cole os dados abaixo, salve e teste a conexão antes de enviar mensagens.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Configurações do usuário</h2>
+          <button onclick="carregarSettings()">Carregar configurações</button>
+        </div>
+
+        <div class="form">
+          <input id="settingsWhatsappAccessToken" type="text" placeholder="WhatsApp Access Token" />
+          <input id="settingsWhatsappPhoneNumberId" type="text" placeholder="WhatsApp Phone Number ID" />
+          <input id="settingsWhatsappVerifyToken" type="text" placeholder="WhatsApp Verify Token" />
+          <button onclick="salvarSettings()">Salvar configurações</button>
+          <button onclick="testarConexaoWhatsApp()">Testar conexão WhatsApp</button>
+        </div>
+
+        <div class="item-card">
+          <div class="item-top">
+            <strong>Status da conexão</strong>
+            <span class="badge" id="whatsappConnectionStatus">Não testado</span>
+          </div>
+          <div class="item-line muted" id="whatsappConnectionMessage">Preencha suas credenciais e clique em testar conexão.</div>
+        </div>
+
+        <pre id="settingsResult">Aguardando configurações.</pre>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Informações da sessão</h2>
+          <button onclick="validarSessao()">Atualizar sessão</button>
+        </div>
+        <pre id="authInfo">Sessão ativa.</pre>
+      </section>
+    </div>
   </div>
 
   <script>
@@ -412,6 +427,14 @@
     function loadTheme() {
       const saved = localStorage.getItem("zapflow-theme") || "light";
       document.body.setAttribute("data-theme", saved);
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".tab-button").forEach(el => el.classList.remove("active"));
+
+      document.getElementById(`tab-${tabName}`).classList.add("active");
+      document.getElementById(`tabBtn-${tabName}`).classList.add("active");
     }
 
     function setTechnicalResult(data) {
@@ -686,6 +709,7 @@
       document.getElementById("leadNextAction").value = item.nextAction;
       document.getElementById("leadNotes").value = item.notes || "";
       setSystemMessage("Lead carregado para edição.");
+      switchTab("leads");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -697,6 +721,7 @@
       document.getElementById("proposalStatus").value = item.status;
       document.getElementById("proposalNote").value = item.note || "";
       setSystemMessage("Proposta carregada para edição.");
+      switchTab("propostas");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -1198,6 +1223,7 @@
       await listarLeads();
       await listarPropostas();
       await carregarResumoComercial();
+      switchTab("dashboard");
     }
 
     loadTheme();
