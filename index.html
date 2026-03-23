@@ -190,13 +190,29 @@
 
     async function criarLead() {
       setSystemMessage("Criando lead...");
+
       try {
+        const name = document.getElementById("leadName").value.trim();
+        const project = document.getElementById("leadProject").value.trim();
+        const city = document.getElementById("leadCity").value.trim();
+        const source = document.getElementById("leadSource").value.trim();
+        const budget = document.getElementById("leadBudget").value.trim();
+
+        if (!name || !project || !city) {
+          setSystemMessage("Preencha nome, projeto e cidade antes de criar o lead.");
+          setTechnicalResult({
+            ok: false,
+            error: "Campos obrigatórios: nome, projeto e cidade"
+          });
+          return;
+        }
+
         const payload = {
-          name: document.getElementById("leadName").value || "Novo lead",
-          project: document.getElementById("leadProject").value || "Novo projeto",
-          city: document.getElementById("leadCity").value || "Não informado",
-          source: document.getElementById("leadSource").value || "WhatsApp",
-          budget: document.getElementById("leadBudget").value || "R$ 0,00",
+          name,
+          project,
+          city,
+          source: source || "WhatsApp",
+          budget: budget || "R$ 0,00",
           stage: "Novo lead",
           nextAction: "Responder em até 15 min",
           temperature: "Quente"
@@ -212,12 +228,44 @@
 
         const data = await res.json();
         setTechnicalResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao criar lead.");
+          return;
+        }
+
         await listarLeads();
         limparCamposLead();
         setSystemMessage("Lead criado com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao criar lead" });
         setSystemMessage("Erro ao criar lead.");
+      }
+    }
+
+    async function excluirLead(id) {
+      if (!confirm("Deseja realmente excluir este lead?")) return;
+
+      setSystemMessage("Excluindo lead...");
+
+      try {
+        const res = await fetch(API_URL + "/leads/" + id, {
+          method: "DELETE"
+        });
+
+        const data = await res.json();
+        setTechnicalResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao excluir lead.");
+          return;
+        }
+
+        await listarLeads();
+        setSystemMessage("Lead excluído com sucesso.");
+      } catch (error) {
+        setTechnicalResult({ ok: false, error: "Erro ao excluir lead" });
+        setSystemMessage("Erro ao excluir lead.");
       }
     }
 
@@ -241,11 +289,25 @@
 
     async function criarProposta() {
       setSystemMessage("Criando proposta...");
+
       try {
+        const client = document.getElementById("proposalClient").value.trim();
+        const title = document.getElementById("proposalTitle").value.trim();
+        const value = document.getElementById("proposalValue").value.trim();
+
+        if (!client || !title || !value) {
+          setSystemMessage("Preencha cliente, título e valor antes de criar a proposta.");
+          setTechnicalResult({
+            ok: false,
+            error: "Campos obrigatórios: cliente, título e valor"
+          });
+          return;
+        }
+
         const payload = {
-          client: document.getElementById("proposalClient").value || "Cliente não informado",
-          title: document.getElementById("proposalTitle").value || "Nova proposta",
-          value: document.getElementById("proposalValue").value || "R$ 0,00",
+          client,
+          title,
+          value,
           status: "Em montagem"
         };
 
@@ -259,12 +321,44 @@
 
         const data = await res.json();
         setTechnicalResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao criar proposta.");
+          return;
+        }
+
         await listarPropostas();
         limparCamposProposta();
         setSystemMessage("Proposta criada com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao criar proposta" });
         setSystemMessage("Erro ao criar proposta.");
+      }
+    }
+
+    async function excluirProposta(id) {
+      if (!confirm("Deseja realmente excluir esta proposta?")) return;
+
+      setSystemMessage("Excluindo proposta...");
+
+      try {
+        const res = await fetch(API_URL + "/proposals/" + id, {
+          method: "DELETE"
+        });
+
+        const data = await res.json();
+        setTechnicalResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao excluir proposta.");
+          return;
+        }
+
+        await listarPropostas();
+        setSystemMessage("Proposta excluída com sucesso.");
+      } catch (error) {
+        setTechnicalResult({ ok: false, error: "Erro ao excluir proposta" });
+        setSystemMessage("Erro ao excluir proposta.");
       }
     }
 
@@ -287,6 +381,7 @@
           <div class="item-line">Origem: ${item.source}</div>
           <div class="item-line">Orçamento: ${item.budget}</div>
           <div class="item-line muted">Próxima ação: ${item.nextAction}</div>
+          <button onclick="excluirLead(${item.id})">Excluir lead</button>
         </div>
       `).join("");
     }
@@ -307,6 +402,7 @@
           </div>
           <div class="item-line">Cliente: ${item.client}</div>
           <div class="item-line">Valor: ${item.value}</div>
+          <button onclick="excluirProposta(${item.id})">Excluir proposta</button>
         </div>
       `).join("");
     }
