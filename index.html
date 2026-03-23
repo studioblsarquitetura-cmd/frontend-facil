@@ -54,11 +54,12 @@
     </header>
 
     <section class="card">
-      <div class="tabs-nav">
+      <div class="tabs-nav" id="tabsNav">
         <button class="tab-button active" id="tabBtn-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
         <button class="tab-button" id="tabBtn-leads" onclick="switchTab('leads')">Leads</button>
         <button class="tab-button" id="tabBtn-propostas" onclick="switchTab('propostas')">Propostas</button>
         <button class="tab-button" id="tabBtn-configuracoes" onclick="switchTab('configuracoes')">Configurações</button>
+        <button class="tab-button" id="tabBtn-admin" onclick="switchTab('admin')" style="display:none;">Admin</button>
       </div>
     </section>
 
@@ -71,114 +72,34 @@
 
     <div class="tab-content active" id="tab-dashboard">
       <section class="grid stats-grid">
-        <div class="card stat-card">
-          <span>Total de Leads</span>
-          <strong id="totalLeads">0</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Total de Propostas</span>
-          <strong id="totalPropostas">0</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Em Montagem</span>
-          <strong id="propostasMontagem">0</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Propostas Enviadas</span>
-          <strong id="propostasEnviadas">0</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Leads Quentes</span>
-          <strong id="leadsQuentes">0</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Leads Mornos</span>
-          <strong id="leadsMornos">0</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Leads Frios</span>
-          <strong id="leadsFrios">0</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Status Backend</span>
-          <strong id="statusBackend">Aguardando</strong>
-        </div>
+        <div class="card stat-card"><span>Total de Leads</span><strong id="totalLeads">0</strong></div>
+        <div class="card stat-card"><span>Total de Propostas</span><strong id="totalPropostas">0</strong></div>
+        <div class="card stat-card"><span>Em Montagem</span><strong id="propostasMontagem">0</strong></div>
+        <div class="card stat-card"><span>Propostas Enviadas</span><strong id="propostasEnviadas">0</strong></div>
+        <div class="card stat-card"><span>Leads Quentes</span><strong id="leadsQuentes">0</strong></div>
+        <div class="card stat-card"><span>Leads Mornos</span><strong id="leadsMornos">0</strong></div>
+        <div class="card stat-card"><span>Leads Frios</span><strong id="leadsFrios">0</strong></div>
+        <div class="card stat-card"><span>Status Backend</span><strong id="statusBackend">Aguardando</strong></div>
       </section>
 
       <section class="grid stats-grid">
-        <div class="card stat-card">
-          <span>Valor Total Propostas</span>
-          <strong id="commercialTotalValue">R$ 0,00</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Aprovadas</span>
-          <strong id="commercialApproved">0</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Recusadas</span>
-          <strong id="commercialRefused">0</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Taxa Aprovação</span>
-          <strong id="commercialApprovalRate">0%</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Taxa Recusa</span>
-          <strong id="commercialRefusalRate">0%</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Enviadas</span>
-          <strong id="commercialSent">0</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Total Comercial</span>
-          <strong id="commercialTotalCount">0</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Usuário</span>
-          <strong id="loggedUser">-</strong>
-        </div>
+        <div class="card stat-card"><span>Valor Total Propostas</span><strong id="commercialTotalValue">R$ 0,00</strong></div>
+        <div class="card stat-card"><span>Aprovadas</span><strong id="commercialApproved">0</strong></div>
+        <div class="card stat-card"><span>Recusadas</span><strong id="commercialRefused">0</strong></div>
+        <div class="card stat-card"><span>Taxa Aprovação</span><strong id="commercialApprovalRate">0%</strong></div>
+        <div class="card stat-card"><span>Taxa Recusa</span><strong id="commercialRefusalRate">0%</strong></div>
+        <div class="card stat-card"><span>Enviadas</span><strong id="commercialSent">0</strong></div>
+        <div class="card stat-card"><span>Total Comercial</span><strong id="commercialTotalCount">0</strong></div>
+        <div class="card stat-card"><span>Usuário</span><strong id="loggedUser">-</strong></div>
       </section>
 
       <section class="card">
-        <div class="card-header">
-          <h2>Funil Comercial</h2>
-        </div>
-
+        <div class="card-header"><h2>Funil Comercial</h2></div>
         <div class="grid stats-grid">
-          <div class="card stat-card">
-            <span>Novo lead</span>
-            <strong id="funnelNovoLead">0</strong>
-          </div>
-
-          <div class="card stat-card">
-            <span>Reunião agendada</span>
-            <strong id="funnelReuniao">0</strong>
-          </div>
-
-          <div class="card stat-card">
-            <span>Proposta enviada</span>
-            <strong id="funnelProposta">0</strong>
-          </div>
-
-          <div class="card stat-card">
-            <span>Fechado</span>
-            <strong id="funnelFechado">0</strong>
-          </div>
+          <div class="card stat-card"><span>Novo lead</span><strong id="funnelNovoLead">0</strong></div>
+          <div class="card stat-card"><span>Reunião agendada</span><strong id="funnelReuniao">0</strong></div>
+          <div class="card stat-card"><span>Proposta enviada</span><strong id="funnelProposta">0</strong></div>
+          <div class="card stat-card"><span>Fechado</span><strong id="funnelFechado">0</strong></div>
         </div>
       </section>
 
@@ -187,48 +108,26 @@
           <h2>Kanban de Leads</h2>
           <button onclick="listarLeads()">Atualizar kanban</button>
         </div>
-
         <div id="kanbanBoard" class="kanban-board">
-          <div class="kanban-column">
-            <div class="kanban-title">Novo lead</div>
-            <div id="kanbanNovoLead" class="kanban-list"></div>
-          </div>
-
-          <div class="kanban-column">
-            <div class="kanban-title">Reunião agendada</div>
-            <div id="kanbanReuniao" class="kanban-list"></div>
-          </div>
-
-          <div class="kanban-column">
-            <div class="kanban-title">Proposta enviada</div>
-            <div id="kanbanProposta" class="kanban-list"></div>
-          </div>
-
-          <div class="kanban-column">
-            <div class="kanban-title">Fechado</div>
-            <div id="kanbanFechado" class="kanban-list"></div>
-          </div>
+          <div class="kanban-column"><div class="kanban-title">Novo lead</div><div id="kanbanNovoLead" class="kanban-list"></div></div>
+          <div class="kanban-column"><div class="kanban-title">Reunião agendada</div><div id="kanbanReuniao" class="kanban-list"></div></div>
+          <div class="kanban-column"><div class="kanban-title">Proposta enviada</div><div id="kanbanProposta" class="kanban-list"></div></div>
+          <div class="kanban-column"><div class="kanban-title">Fechado</div><div id="kanbanFechado" class="kanban-list"></div></div>
         </div>
       </section>
 
       <section class="card">
-        <div class="card-header">
-          <h2>Resultado técnico</h2>
-        </div>
+        <div class="card-header"><h2>Resultado técnico</h2></div>
         <pre id="resultadoTecnico">Pronto para uso.</pre>
       </section>
     </div>
 
     <div class="tab-content" id="tab-leads">
       <section class="card">
-        <div class="card-header">
-          <h2>Leads</h2>
-          <button onclick="listarLeads()">Atualizar leads</button>
-        </div>
+        <div class="card-header"><h2>Leads</h2><button onclick="listarLeads()">Atualizar leads</button></div>
 
         <div class="form">
           <input id="leadSearch" type="text" placeholder="Buscar lead por nome" oninput="aplicarFiltros()" />
-
           <select id="leadStageFilter" onchange="aplicarFiltros()">
             <option value="">Filtrar por status</option>
             <option value="Novo lead">Novo lead</option>
@@ -236,7 +135,6 @@
             <option value="Proposta enviada">Proposta enviada</option>
             <option value="Fechado">Fechado</option>
           </select>
-
           <select id="leadTemperatureFilter" onchange="aplicarFiltros()">
             <option value="">Filtrar por temperatura</option>
             <option value="Quente">Quente</option>
@@ -253,39 +151,30 @@
           <input id="leadPhone" type="text" placeholder="Telefone WhatsApp (5511999999999)" />
           <input id="leadSource" type="text" placeholder="Origem" />
           <input id="leadBudget" type="text" placeholder="Orçamento" />
-
           <select id="leadStage">
             <option value="Novo lead">Novo lead</option>
             <option value="Reunião agendada">Reunião agendada</option>
             <option value="Proposta enviada">Proposta enviada</option>
             <option value="Fechado">Fechado</option>
           </select>
-
           <select id="leadTemperature">
             <option value="Quente">Quente</option>
             <option value="Morno">Morno</option>
             <option value="Frio">Frio</option>
           </select>
-
           <input id="leadNextAction" type="text" placeholder="Próxima ação" />
           <textarea id="leadNotes" placeholder="Observações do lead"></textarea>
-
           <button onclick="salvarLead()">Salvar lead</button>
           <button onclick="limparCamposLead()">Limpar campos</button>
         </div>
 
-        <div id="leadsLista" class="list-box">
-          <p class="placeholder">Nenhum lead carregado.</p>
-        </div>
+        <div id="leadsLista" class="list-box"><p class="placeholder">Nenhum lead carregado.</p></div>
       </section>
     </div>
 
     <div class="tab-content" id="tab-propostas">
       <section class="card">
-        <div class="card-header">
-          <h2>Propostas</h2>
-          <button onclick="listarPropostas()">Atualizar propostas</button>
-        </div>
+        <div class="card-header"><h2>Propostas</h2><button onclick="listarPropostas()">Atualizar propostas</button></div>
 
         <div class="form">
           <select id="proposalStatusFilter" onchange="aplicarFiltros()">
@@ -302,93 +191,41 @@
           <input id="proposalClient" type="text" placeholder="Cliente" />
           <input id="proposalTitle" type="text" placeholder="Título da proposta" />
           <input id="proposalValue" type="text" placeholder="Valor" />
-
           <select id="proposalStatus">
             <option value="Em montagem">Em montagem</option>
             <option value="Enviada">Enviada</option>
             <option value="Aprovada">Aprovada</option>
             <option value="Recusada">Recusada</option>
           </select>
-
           <textarea id="proposalNote" placeholder="Observação da proposta"></textarea>
-
           <button onclick="salvarProposta()">Salvar proposta</button>
           <button onclick="limparCamposProposta()">Limpar campos</button>
         </div>
 
-        <div id="propostasLista" class="list-box">
-          <p class="placeholder">Nenhuma proposta carregada.</p>
-        </div>
+        <div id="propostasLista" class="list-box"><p class="placeholder">Nenhuma proposta carregada.</p></div>
       </section>
     </div>
 
     <div class="tab-content" id="tab-configuracoes">
       <section class="grid stats-grid">
-        <div class="card stat-card">
-          <span>Plano atual</span>
-          <strong id="accountPlan">-</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Status da conta</span>
-          <strong id="accountStatus">-</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Trial até</span>
-          <strong id="accountTrialEndsAt">-</strong>
-        </div>
-
-        <div class="card stat-card">
-          <span>Acesso até</span>
-          <strong id="accountAccessExpiresAt">-</strong>
-        </div>
+        <div class="card stat-card"><span>Plano atual</span><strong id="accountPlan">-</strong></div>
+        <div class="card stat-card"><span>Status da conta</span><strong id="accountStatus">-</strong></div>
+        <div class="card stat-card"><span>Trial até</span><strong id="accountTrialEndsAt">-</strong></div>
+        <div class="card stat-card"><span>Acesso até</span><strong id="accountAccessExpiresAt">-</strong></div>
       </section>
 
       <section class="card">
-        <div class="card-header">
-          <h2>Status do acesso</h2>
-        </div>
+        <div class="card-header"><h2>Status do acesso</h2></div>
         <pre id="accountMessage">Carregando informações da conta.</pre>
       </section>
 
       <section class="card">
-        <div class="card-header">
-          <h2>Onboarding guiado do WhatsApp</h2>
-        </div>
-
+        <div class="card-header"><h2>Onboarding guiado do WhatsApp</h2></div>
         <div class="list-box">
-          <div class="item-card">
-            <div class="item-top">
-              <strong>Passo 1</strong>
-              <span class="badge">Meta</span>
-            </div>
-            <div class="item-line">Crie seu app na Meta e ative o produto WhatsApp.</div>
-          </div>
-
-          <div class="item-card">
-            <div class="item-top">
-              <strong>Passo 2</strong>
-              <span class="badge">API Setup</span>
-            </div>
-            <div class="item-line">Copie o Access Token e o Phone Number ID na tela de configuração da API.</div>
-          </div>
-
-          <div class="item-card">
-            <div class="item-top">
-              <strong>Passo 3</strong>
-              <span class="badge">Webhook</span>
-            </div>
-            <div class="item-line">Defina um Verify Token e configure o callback do webhook usando seu backend.</div>
-          </div>
-
-          <div class="item-card">
-            <div class="item-top">
-              <strong>Passo 4</strong>
-              <span class="badge">Painel</span>
-            </div>
-            <div class="item-line">Cole os dados abaixo, salve e teste a conexão antes de enviar mensagens.</div>
-          </div>
+          <div class="item-card"><div class="item-top"><strong>Passo 1</strong><span class="badge">Meta</span></div><div class="item-line">Crie seu app na Meta e ative o produto WhatsApp.</div></div>
+          <div class="item-card"><div class="item-top"><strong>Passo 2</strong><span class="badge">API Setup</span></div><div class="item-line">Copie o Access Token e o Phone Number ID na tela de configuração da API.</div></div>
+          <div class="item-card"><div class="item-top"><strong>Passo 3</strong><span class="badge">Webhook</span></div><div class="item-line">Defina um Verify Token e configure o callback do webhook usando seu backend.</div></div>
+          <div class="item-card"><div class="item-top"><strong>Passo 4</strong><span class="badge">Painel</span></div><div class="item-line">Cole os dados abaixo, salve e teste a conexão antes de enviar mensagens.</div></div>
         </div>
       </section>
 
@@ -418,11 +255,54 @@
       </section>
 
       <section class="card">
-        <div class="card-header">
-          <h2>Informações da sessão</h2>
-          <button onclick="validarSessao()">Atualizar sessão</button>
-        </div>
+        <div class="card-header"><h2>Informações da sessão</h2><button onclick="validarSessao()">Atualizar sessão</button></div>
         <pre id="authInfo">Sessão ativa.</pre>
+      </section>
+    </div>
+
+    <div class="tab-content" id="tab-admin">
+      <section class="card">
+        <div class="card-header">
+          <h2>Painel Admin de Usuários</h2>
+          <button onclick="listarUsuariosAdmin()">Atualizar usuários</button>
+        </div>
+        <div id="adminUsersList" class="list-box">
+          <p class="placeholder">Nenhum usuário carregado.</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Editar acesso do usuário</h2>
+        </div>
+
+        <div class="form">
+          <input id="adminUserId" type="hidden" />
+          <input id="adminUserName" type="text" placeholder="Nome do usuário" disabled />
+          <input id="adminUserEmail" type="text" placeholder="E-mail do usuário" disabled />
+
+          <select id="adminPlan">
+            <option value="trial">trial</option>
+            <option value="basic">basic</option>
+            <option value="pro">pro</option>
+          </select>
+
+          <select id="adminAccessStatus">
+            <option value="trialing">trialing</option>
+            <option value="active">active</option>
+            <option value="past_due">past_due</option>
+            <option value="canceled">canceled</option>
+            <option value="blocked">blocked</option>
+          </select>
+
+          <input id="adminTrialEndsAt" type="datetime-local" />
+          <input id="adminAccessExpiresAt" type="datetime-local" />
+
+          <button onclick="salvarAcessoUsuario()">Salvar acesso</button>
+          <button onclick="limparAdminForm()">Limpar</button>
+        </div>
+
+        <pre id="adminResult">Aguardando edição de usuário.</pre>
       </section>
     </div>
   </div>
@@ -434,6 +314,7 @@
     let allLeads = [];
     let allProposals = [];
     let authMode = "login";
+    let isAdminUser = false;
 
     function getToken() {
       return localStorage.getItem(TOKEN_KEY) || "";
@@ -465,13 +346,8 @@
     }
 
     function switchTab(tabName) {
-      document.querySelectorAll(".tab-content").forEach(el => {
-        el.classList.remove("active");
-      });
-
-      document.querySelectorAll(".tab-button").forEach(el => {
-        el.classList.remove("active");
-      });
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".tab-button").forEach(el => el.classList.remove("active"));
 
       const targetTab = document.getElementById(`tab-${tabName}`);
       const targetButton = document.getElementById(`tabBtn-${tabName}`);
@@ -511,9 +387,7 @@
     }
 
     async function submitAuth() {
-      if (authMode === "login") {
-        return loginReal();
-      }
+      if (authMode === "login") return loginReal();
       return registerReal();
     }
 
@@ -522,6 +396,14 @@
       const d = new Date(value);
       if (isNaN(d.getTime())) return "-";
       return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function formatInputDate(value) {
+      if (!value) return "";
+      const d = new Date(value);
+      if (isNaN(d.getTime())) return "";
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
     function setTechnicalResult(data) {
@@ -544,6 +426,14 @@
       document.getElementById("whatsappConnectionMessage").textContent = message;
     }
 
+    function updateAdminVisibility(user) {
+      isAdminUser = user && user.email === "demo@zapflow.com";
+      const adminBtn = document.getElementById("tabBtn-admin");
+      if (adminBtn) {
+        adminBtn.style.display = isAdminUser ? "block" : "none";
+      }
+    }
+
     function updateAccountUI(account) {
       if (!account) return;
 
@@ -557,11 +447,8 @@
       if (account.accessStatus === "trialing") {
         message = `Sua conta está em período de teste até ${formatDateBr(account.trialEndsAt)}.`;
       } else if (account.accessStatus === "active") {
-        if (account.accessExpiresAt) {
-          message = `Seu acesso está ativo até ${formatDateBr(account.accessExpiresAt)}.`;
-        } else {
-          message = "Seu acesso está ativo.";
-        }
+        if (account.accessExpiresAt) message = `Seu acesso está ativo até ${formatDateBr(account.accessExpiresAt)}.`;
+        else message = "Seu acesso está ativo.";
       } else if (account.accessStatus === "past_due") {
         message = "Seu acesso está pendente de renovação.";
       } else if (account.accessStatus === "blocked") {
@@ -607,6 +494,7 @@
         setToken(data.token);
         document.getElementById("loggedUser").textContent = data.user.name;
         document.getElementById("authInfo").textContent = JSON.stringify(data.user, null, 2);
+        updateAdminVisibility(data.user);
         showApp();
         await carregarSistema();
         setSystemMessage("Conta criada com sucesso.");
@@ -638,6 +526,7 @@
         setToken(data.token);
         document.getElementById("loggedUser").textContent = data.user.name;
         document.getElementById("authInfo").textContent = JSON.stringify(data.user, null, 2);
+        updateAdminVisibility(data.user);
         if (data.account) updateAccountUI(data.account);
         showApp();
         await carregarSistema();
@@ -649,9 +538,7 @@
     async function carregarAccount() {
       try {
         const res = await fetch(API_URL + "/account", {
-          headers: {
-            "Authorization": "Bearer " + getToken()
-          }
+          headers: { "Authorization": "Bearer " + getToken() }
         });
 
         const data = await res.json();
@@ -675,9 +562,7 @@
 
       try {
         const res = await fetch(API_URL + "/me", {
-          headers: {
-            "Authorization": "Bearer " + token
-          }
+          headers: { "Authorization": "Bearer " + token }
         });
 
         const data = await res.json();
@@ -690,6 +575,7 @@
 
         document.getElementById("loggedUser").textContent = data.user.name || data.user.email;
         document.getElementById("authInfo").textContent = JSON.stringify(data.user, null, 2);
+        updateAdminVisibility(data.user);
         if (data.account) updateAccountUI(data.account);
         showApp();
         await carregarSistema();
@@ -709,9 +595,7 @@
 
       try {
         const res = await fetch(API_URL + "/settings", {
-          headers: {
-            "Authorization": "Bearer " + getToken()
-          }
+          headers: { "Authorization": "Bearer " + getToken() }
         });
 
         const data = await res.json();
@@ -810,19 +694,124 @@
       }
     }
 
+    async function listarUsuariosAdmin() {
+      if (!isAdminUser) return;
+
+      setSystemMessage("Carregando usuários do painel admin...");
+
+      try {
+        const res = await fetch(API_URL + "/admin/users", {
+          headers: authHeaders()
+        });
+
+        const data = await res.json();
+        document.getElementById("adminResult").textContent = JSON.stringify(data, null, 2);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao listar usuários.");
+          return;
+        }
+
+        const items = data.items || [];
+        const container = document.getElementById("adminUsersList");
+
+        if (!items.length) {
+          container.innerHTML = '<p class="placeholder">Nenhum usuário encontrado.</p>';
+          return;
+        }
+
+        container.innerHTML = items.map(item => `
+          <div class="item-card">
+            <div class="item-top">
+              <strong>${item.name}</strong>
+              <span class="badge">${item.accessStatus || "-"}</span>
+            </div>
+            <div class="item-line">E-mail: ${item.email}</div>
+            <div class="item-line">Plano: ${item.plan || "-"}</div>
+            <div class="item-line">Trial até: ${formatDateBr(item.trialEndsAt)}</div>
+            <div class="item-line">Acesso até: ${formatDateBr(item.accessExpiresAt)}</div>
+            <button onclick='preencherAdminForm(${JSON.stringify(item).replace(/"/g, '&quot;')})'>Editar acesso</button>
+          </div>
+        `).join("");
+
+        setSystemMessage("Usuários carregados com sucesso.");
+      } catch (error) {
+        setSystemMessage("Erro ao listar usuários.");
+      }
+    }
+
+    function preencherAdminForm(item) {
+      document.getElementById("adminUserId").value = item.id;
+      document.getElementById("adminUserName").value = item.name || "";
+      document.getElementById("adminUserEmail").value = item.email || "";
+      document.getElementById("adminPlan").value = item.plan || "trial";
+      document.getElementById("adminAccessStatus").value = item.accessStatus || "trialing";
+      document.getElementById("adminTrialEndsAt").value = formatInputDate(item.trialEndsAt);
+      document.getElementById("adminAccessExpiresAt").value = formatInputDate(item.accessExpiresAt);
+      document.getElementById("adminResult").textContent = JSON.stringify(item, null, 2);
+      switchTab("admin");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function limparAdminForm() {
+      document.getElementById("adminUserId").value = "";
+      document.getElementById("adminUserName").value = "";
+      document.getElementById("adminUserEmail").value = "";
+      document.getElementById("adminPlan").value = "trial";
+      document.getElementById("adminAccessStatus").value = "trialing";
+      document.getElementById("adminTrialEndsAt").value = "";
+      document.getElementById("adminAccessExpiresAt").value = "";
+      document.getElementById("adminResult").textContent = "Aguardando edição de usuário.";
+    }
+
+    async function salvarAcessoUsuario() {
+      const userId = document.getElementById("adminUserId").value.trim();
+      if (!userId) {
+        setSystemMessage("Selecione um usuário para editar.");
+        return;
+      }
+
+      setSystemMessage("Salvando acesso do usuário...");
+
+      try {
+        const payload = {
+          plan: document.getElementById("adminPlan").value,
+          accessStatus: document.getElementById("adminAccessStatus").value,
+          trialEndsAt: document.getElementById("adminTrialEndsAt").value || null,
+          accessExpiresAt: document.getElementById("adminAccessExpiresAt").value || null
+        };
+
+        const res = await fetch(API_URL + "/admin/users/" + userId + "/access", {
+          method: "PUT",
+          headers: authHeaders(),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        document.getElementById("adminResult").textContent = JSON.stringify(data, null, 2);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao salvar acesso.");
+          return;
+        }
+
+        await listarUsuariosAdmin();
+        setSystemMessage("Acesso do usuário atualizado com sucesso.");
+      } catch (error) {
+        setSystemMessage("Erro ao salvar acesso.");
+      }
+    }
+
     async function carregarResumoComercial() {
       try {
         const res = await fetch(API_URL + "/commercial-summary", {
-          headers: {
-            "Authorization": "Bearer " + getToken()
-          }
+          headers: { "Authorization": "Bearer " + getToken() }
         });
         const data = await res.json();
 
         if (!data.ok) return;
 
         const s = data.summary;
-
         document.getElementById("commercialTotalValue").textContent = formatMoneyBr(s.totalValue);
         document.getElementById("commercialApproved").textContent = s.approvedCount;
         document.getElementById("commercialRefused").textContent = s.refusedCount;
@@ -917,10 +906,7 @@
         const res = await fetch(API_URL + "/whatsapp/send", {
           method: "POST",
           headers: authHeaders(),
-          body: JSON.stringify({
-            to,
-            message: customMessage
-          })
+          body: JSON.stringify({ to, message: customMessage })
         });
 
         const data = await res.json();
@@ -1002,9 +988,7 @@
         return matchesName && matchesStage && matchesTemperature;
       });
 
-      const filteredProposals = allProposals.filter(item =>
-        !proposalStatusFilter || item.status === proposalStatusFilter
-      );
+      const filteredProposals = allProposals.filter(item => !proposalStatusFilter || item.status === proposalStatusFilter);
 
       renderLeads(filteredLeads);
       renderProposals(filteredProposals);
@@ -1016,9 +1000,7 @@
       setSystemMessage("Verificando backend...");
       try {
         const res = await fetch(API_URL + "/me", {
-          headers: {
-            "Authorization": "Bearer " + getToken()
-          }
+          headers: { "Authorization": "Bearer " + getToken() }
         });
         const data = await res.json();
         document.getElementById("statusBackend").textContent = res.ok ? "Online" : "Erro";
@@ -1035,9 +1017,7 @@
       setSystemMessage("Carregando leads...");
       try {
         const res = await fetch(API_URL + "/leads", {
-          headers: {
-            "Authorization": "Bearer " + getToken()
-          }
+          headers: { "Authorization": "Bearer " + getToken() }
         });
         const data = await res.json();
         allLeads = data.items || [];
@@ -1146,9 +1126,7 @@
       try {
         const res = await fetch(API_URL + "/leads/" + id + "/advance", {
           method: "POST",
-          headers: {
-            "Authorization": "Bearer " + getToken()
-          }
+          headers: { "Authorization": "Bearer " + getToken() }
         });
         const data = await res.json();
         setTechnicalResult(data);
@@ -1163,9 +1141,7 @@
       try {
         const res = await fetch(API_URL + "/leads/" + id + "/back", {
           method: "POST",
-          headers: {
-            "Authorization": "Bearer " + getToken()
-          }
+          headers: { "Authorization": "Bearer " + getToken() }
         });
         const data = await res.json();
         setTechnicalResult(data);
@@ -1184,9 +1160,7 @@
       try {
         const res = await fetch(API_URL + "/leads/" + id, {
           method: "DELETE",
-          headers: {
-            "Authorization": "Bearer " + getToken()
-          }
+          headers: { "Authorization": "Bearer " + getToken() }
         });
         const data = await res.json();
         setTechnicalResult(data);
@@ -1208,9 +1182,7 @@
       setSystemMessage("Carregando propostas...");
       try {
         const res = await fetch(API_URL + "/proposals", {
-          headers: {
-            "Authorization": "Bearer " + getToken()
-          }
+          headers: { "Authorization": "Bearer " + getToken() }
         });
         const data = await res.json();
         allProposals = data.items || [];
@@ -1314,9 +1286,7 @@
       try {
         const res = await fetch(API_URL + "/proposals/" + id, {
           method: "DELETE",
-          headers: {
-            "Authorization": "Bearer " + getToken()
-          }
+          headers: { "Authorization": "Bearer " + getToken() }
         });
         const data = await res.json();
         setTechnicalResult(data);
@@ -1394,6 +1364,7 @@
       await listarLeads();
       await listarPropostas();
       await carregarResumoComercial();
+      if (isAdminUser) await listarUsuariosAdmin();
       switchTab("dashboard");
     }
 
