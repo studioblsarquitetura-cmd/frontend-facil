@@ -57,6 +57,13 @@
       </div>
     </section>
 
+    <section class="card">
+      <div class="card-header">
+        <h2>Alertas do sistema</h2>
+      </div>
+      <pre id="systemMessage">Sistema carregado.</pre>
+    </section>
+
     <div class="tab-content active" id="tab-dashboard">
       <section class="grid stats-grid">
         <div class="card stat-card">
@@ -197,13 +204,6 @@
             <div id="kanbanFechado" class="kanban-list"></div>
           </div>
         </div>
-      </section>
-
-      <section class="card">
-        <div class="card-header">
-          <h2>Alertas do sistema</h2>
-        </div>
-        <pre id="systemMessage">Sistema carregado.</pre>
       </section>
 
       <section class="card">
@@ -430,11 +430,19 @@
     }
 
     function switchTab(tabName) {
-      document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
-      document.querySelectorAll(".tab-button").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(el => {
+        el.classList.remove("active");
+      });
 
-      document.getElementById(`tab-${tabName}`).classList.add("active");
-      document.getElementById(`tabBtn-${tabName}`).classList.add("active");
+      document.querySelectorAll(".tab-button").forEach(el => {
+        el.classList.remove("active");
+      });
+
+      const targetTab = document.getElementById(`tab-${tabName}`);
+      const targetButton = document.getElementById(`tabBtn-${tabName}`);
+
+      if (targetTab) targetTab.classList.add("active");
+      if (targetButton) targetButton.classList.add("active");
     }
 
     function setTechnicalResult(data) {

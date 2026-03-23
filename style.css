@@ -372,3 +372,30 @@ pre {
     grid-template-columns: 1fr 1fr;
   }
 }
+.tabs-nav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.tab-button {
+  width: 100%;
+}
+
+.tab-button.active {
+  outline: 2px solid rgba(59, 130, 246, 0.45);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .tabs-nav {
+    grid-template-columns: 1fr 1fr;
+  }
+}
