@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body data-theme="light">
+  <div id="fb-root"></div>
+
   <div class="app" id="loginScreen">
     <header class="topbar">
       <div>
@@ -220,18 +222,51 @@
       </section>
 
       <section class="card">
+        <div class="card-header">
+          <h2>Conexão oficial do WhatsApp</h2>
+          <button onclick="carregarWhatsappConnectionStatus()">Atualizar status</button>
+        </div>
+
+        <div class="grid stats-grid">
+          <div class="card stat-card">
+            <span>Conectado</span>
+            <strong id="embeddedConnected">Não</strong>
+          </div>
+          <div class="card stat-card">
+            <span>Número conectado</span>
+            <strong id="embeddedDisplayPhone">-</strong>
+          </div>
+          <div class="card stat-card">
+            <span>Nome verificado</span>
+            <strong id="embeddedVerifiedName">-</strong>
+          </div>
+          <div class="card stat-card">
+            <span>Conectado em</span>
+            <strong id="embeddedConnectedAt">-</strong>
+          </div>
+        </div>
+
+        <div class="form">
+          <button onclick="startEmbeddedSignup()">Conectar meu WhatsApp</button>
+          <button onclick="disconnectEmbeddedWhatsapp()">Desconectar WhatsApp</button>
+        </div>
+
+        <pre id="embeddedSignupResult">Aguardando conexão oficial da Meta.</pre>
+      </section>
+
+      <section class="card">
         <div class="card-header"><h2>Onboarding guiado do WhatsApp</h2></div>
         <div class="list-box">
-          <div class="item-card"><div class="item-top"><strong>Passo 1</strong><span class="badge">Meta</span></div><div class="item-line">Crie seu app na Meta e ative o produto WhatsApp.</div></div>
-          <div class="item-card"><div class="item-top"><strong>Passo 2</strong><span class="badge">API Setup</span></div><div class="item-line">Copie o Access Token e o Phone Number ID na tela de configuração da API.</div></div>
-          <div class="item-card"><div class="item-top"><strong>Passo 3</strong><span class="badge">Webhook</span></div><div class="item-line">Defina um Verify Token e configure o callback do webhook usando seu backend.</div></div>
-          <div class="item-card"><div class="item-top"><strong>Passo 4</strong><span class="badge">Painel</span></div><div class="item-line">Cole os dados abaixo, salve e teste a conexão antes de enviar mensagens.</div></div>
+          <div class="item-card"><div class="item-top"><strong>Passo 1</strong><span class="badge">Conta Meta</span></div><div class="item-line">Clique em conectar e faça login na sua conta Meta Business.</div></div>
+          <div class="item-card"><div class="item-top"><strong>Passo 2</strong><span class="badge">Número</span></div><div class="item-line">Escolha ou registre o número que será usado no WhatsApp Business.</div></div>
+          <div class="item-card"><div class="item-top"><strong>Passo 3</strong><span class="badge">Permissões</span></div><div class="item-line">Autorize o ZapFlow a operar sua conexão.</div></div>
+          <div class="item-card"><div class="item-top"><strong>Passo 4</strong><span class="badge">Pronto</span></div><div class="item-line">Ao final do fluxo, o sistema salva a conexão automaticamente.</div></div>
         </div>
       </section>
 
       <section class="card">
         <div class="card-header">
-          <h2>Configurações do usuário</h2>
+          <h2>Configurações manuais do usuário</h2>
           <button onclick="carregarSettings()">Carregar configurações</button>
         </div>
 
@@ -245,7 +280,7 @@
 
         <div class="item-card">
           <div class="item-top">
-            <strong>Status da conexão</strong>
+            <strong>Status da conexão manual</strong>
             <span class="badge" id="whatsappConnectionStatus">Não testado</span>
           </div>
           <div class="item-line muted" id="whatsappConnectionMessage">Preencha suas credenciais e clique em testar conexão.</div>
@@ -309,12 +344,40 @@
 
   <script>
     const API_URL = "https://backend-facil-production.up.railway.app";
+    const META_APP_ID = "908929431902738";
+    const META_CONFIG_ID = "2984057691794248";
     const TOKEN_KEY = "zapflow-token";
 
     let allLeads = [];
     let allProposals = [];
     let authMode = "login";
     let isAdminUser = false;
+    let fbSdkReady = false;
+
+    window.fbAsyncInit = function () {
+      if (!META_APP_ID || META_APP_ID.includes("COLE_AQUI")) {
+        console.warn("META_APP_ID não configurado no index.html");
+        return;
+      }
+
+      FB.init({
+        appId: META_APP_ID,
+        autoLogAppEvents: true,
+        xfbml: false,
+        version: "v23.0"
+      });
+
+      fbSdkReady = true;
+    };
+
+    (function loadFacebookSdk(d, s, id) {
+      const fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      const js = d.createElement(s);
+      js.id = id;
+      js.src = "https://connect.facebook.net/pt_BR/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    })(document, "script", "facebook-jssdk");
 
     function getToken() {
       return localStorage.getItem(TOKEN_KEY) || "";
@@ -426,12 +489,15 @@
       document.getElementById("whatsappConnectionMessage").textContent = message;
     }
 
+    function setEmbeddedResult(data) {
+      const el = document.getElementById("embeddedSignupResult");
+      if (el) el.textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+    }
+
     function updateAdminVisibility(user) {
-      isAdminUser = user && user.email === "demo@zapflow.com";
+      isAdminUser = !!(user && user.email === "demo@zapflow.com");
       const adminBtn = document.getElementById("tabBtn-admin");
-      if (adminBtn) {
-        adminBtn.style.display = isAdminUser ? "block" : "none";
-      }
+      if (adminBtn) adminBtn.style.display = isAdminUser ? "block" : "none";
     }
 
     function updateAccountUI(account) {
@@ -447,8 +513,9 @@
       if (account.accessStatus === "trialing") {
         message = `Sua conta está em período de teste até ${formatDateBr(account.trialEndsAt)}.`;
       } else if (account.accessStatus === "active") {
-        if (account.accessExpiresAt) message = `Seu acesso está ativo até ${formatDateBr(account.accessExpiresAt)}.`;
-        else message = "Seu acesso está ativo.";
+        message = account.accessExpiresAt
+          ? `Seu acesso está ativo até ${formatDateBr(account.accessExpiresAt)}.`
+          : "Seu acesso está ativo.";
       } else if (account.accessStatus === "past_due") {
         message = "Seu acesso está pendente de renovação.";
       } else if (account.accessStatus === "blocked") {
@@ -458,6 +525,13 @@
       }
 
       document.getElementById("accountMessage").textContent = message;
+    }
+
+    function updateEmbeddedConnectionUI(item) {
+      document.getElementById("embeddedConnected").textContent = item?.whatsappConnected ? "Sim" : "Não";
+      document.getElementById("embeddedDisplayPhone").textContent = item?.whatsappDisplayPhone || "-";
+      document.getElementById("embeddedVerifiedName").textContent = item?.whatsappVerifiedName || "-";
+      document.getElementById("embeddedConnectedAt").textContent = formatDateBr(item?.embeddedSignupCompletedAt);
     }
 
     function showLogin() {
@@ -618,8 +692,6 @@
         } else {
           setWhatsappStatus("Incompleto", "Ainda faltam credenciais para testar.");
         }
-
-        setSystemMessage("Configurações carregadas com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao carregar configurações" });
         setSystemMessage("Erro ao carregar configurações.");
@@ -691,6 +763,122 @@
         setTechnicalResult({ ok: false, error: "Erro ao testar conexão WhatsApp" });
         setWhatsappStatus("Erro", "Falha ao testar conexão com WhatsApp.");
         setSystemMessage("Erro ao testar conexão com WhatsApp.");
+      }
+    }
+
+    async function carregarWhatsappConnectionStatus() {
+      try {
+        const res = await fetch(API_URL + "/whatsapp/connection-status", {
+          headers: { "Authorization": "Bearer " + getToken() }
+        });
+
+        const data = await res.json();
+        setEmbeddedResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao carregar status da conexão.");
+          return;
+        }
+
+        updateEmbeddedConnectionUI(data.item || {});
+      } catch (error) {
+        setEmbeddedResult({ ok: false, error: "Erro ao carregar status da conexão" });
+        setSystemMessage("Erro ao carregar status da conexão.");
+      }
+    }
+
+    async function finalizeEmbeddedSignup(code) {
+      setSystemMessage("Finalizando conexão oficial do WhatsApp...");
+
+      try {
+        const res = await fetch(API_URL + "/whatsapp/embedded-signup/exchange-code", {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify({ code })
+        });
+
+        const data = await res.json();
+        setEmbeddedResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao finalizar conexão oficial.");
+          return;
+        }
+
+        await carregarWhatsappConnectionStatus();
+        await carregarSettings();
+        setSystemMessage("WhatsApp conectado com sucesso via fluxo oficial da Meta.");
+      } catch (error) {
+        setEmbeddedResult({ ok: false, error: "Erro ao finalizar Embedded Signup" });
+        setSystemMessage("Erro ao finalizar Embedded Signup.");
+      }
+    }
+
+    function startEmbeddedSignup() {
+      if (!fbSdkReady) {
+        setSystemMessage("SDK da Meta ainda não carregou ou META_APP_ID não foi configurado.");
+        return;
+      }
+
+      setSystemMessage("Abrindo fluxo oficial da Meta...");
+
+      try {
+        FB.login(function(response) {
+          setEmbeddedResult(response || {});
+
+          const authResponse = response && response.authResponse;
+          const code = authResponse && authResponse.code;
+
+          if (!response || !authResponse) {
+            setSystemMessage("Fluxo não concluído.");
+            return;
+          }
+
+          if (!code) {
+            setSystemMessage("A Meta não retornou code. Verifique se o Embedded Signup está configurado corretamente no app Meta.");
+            return;
+          }
+
+          finalizeEmbeddedSignup(code);
+        }, {
+          config_id: META_CONFIG_ID,
+          response_type: "code",
+          override_default_response_type: true,
+          extras: {
+            setup: {},
+            featureType: "whatsapp_embedded_signup",
+            sessionInfoVersion: "3"
+          }
+        });
+      } catch (error) {
+        setEmbeddedResult({ ok: false, error: String(error) });
+        setSystemMessage("Erro ao abrir o Embedded Signup.");
+      }
+    }
+
+    async function disconnectEmbeddedWhatsapp() {
+      setSystemMessage("Desconectando WhatsApp...");
+
+      try {
+        const res = await fetch(API_URL + "/whatsapp/disconnect", {
+          method: "POST",
+          headers: authHeaders()
+        });
+
+        const data = await res.json();
+        setEmbeddedResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao desconectar WhatsApp.");
+          return;
+        }
+
+        updateEmbeddedConnectionUI({});
+        await carregarSettings();
+        setSystemMessage("WhatsApp desconectado com sucesso.");
+      } catch (error) {
+        setEmbeddedResult({ ok: false, error: "Erro ao desconectar WhatsApp" });
+        setSystemMessage("Erro ao desconectar WhatsApp.");
       }
     }
 
@@ -1361,6 +1549,7 @@
       await testarBackend();
       await carregarAccount();
       await carregarSettings();
+      await carregarWhatsappConnectionStatus();
       await listarLeads();
       await listarPropostas();
       await carregarResumoComercial();
