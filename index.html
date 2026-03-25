@@ -60,6 +60,7 @@
         <button class="tab-button active" id="tabBtn-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
         <button class="tab-button" id="tabBtn-leads" onclick="switchTab('leads')">Leads</button>
         <button class="tab-button" id="tabBtn-propostas" onclick="switchTab('propostas')">Propostas</button>
+        <button class="tab-button" id="tabBtn-financeiro" onclick="switchTab('financeiro')">Financeiro</button>
         <button class="tab-button" id="tabBtn-configuracoes" onclick="switchTab('configuracoes')">Configurações</button>
         <button class="tab-button" id="tabBtn-admin" onclick="switchTab('admin')" style="display:none;">Admin</button>
       </div>
@@ -208,6 +209,115 @@
       </section>
     </div>
 
+    <div class="tab-content" id="tab-financeiro">
+      <section class="grid stats-grid">
+        <div class="card stat-card"><span>Entradas</span><strong id="financialEntradas">R$ 0,00</strong></div>
+        <div class="card stat-card"><span>Saídas</span><strong id="financialSaidas">R$ 0,00</strong></div>
+        <div class="card stat-card"><span>Saldo</span><strong id="financialSaldo">R$ 0,00</strong></div>
+        <div class="card stat-card"><span>Lucro Líquido</span><strong id="financialLucro">R$ 0,00</strong></div>
+        <div class="card stat-card"><span>Lançamentos</span><strong id="financialTotalLancamentos">0</strong></div>
+        <div class="card stat-card"><span>Pendentes</span><strong id="financialPendentes">0</strong></div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Lançamento financeiro</h2>
+          <button onclick="limparCamposFinanceiro()">Limpar campos</button>
+        </div>
+
+        <div class="form">
+          <input id="financialId" type="hidden" />
+          <select id="financialType">
+            <option value="entrada">Entrada</option>
+            <option value="saida">Saída</option>
+          </select>
+
+          <select id="financialCategory">
+            <option value="Projetos">Projetos</option>
+            <option value="Honorários">Honorários</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Ferramentas">Ferramentas</option>
+            <option value="Operacional">Operacional</option>
+            <option value="Impostos">Impostos</option>
+            <option value="Equipe">Equipe</option>
+            <option value="Outros">Outros</option>
+          </select>
+
+          <input id="financialDescription" type="text" placeholder="Descrição" />
+          <input id="financialAmount" type="number" step="0.01" placeholder="Valor" />
+          <input id="financialDate" type="date" />
+          <select id="financialStatus">
+            <option value="Pendente">Pendente</option>
+            <option value="Recebido">Recebido</option>
+            <option value="Pago">Pago</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+          <textarea id="financialNotes" placeholder="Observações"></textarea>
+
+          <button onclick="salvarLancamentoFinanceiro()">Salvar lançamento</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Filtros financeiros</h2>
+          <button onclick="listarLancamentosFinanceiros()">Atualizar financeiro</button>
+        </div>
+
+        <div class="form">
+          <select id="financialFilterType" onchange="listarLancamentosFinanceiros()">
+            <option value="">Todos os tipos</option>
+            <option value="entrada">Entradas</option>
+            <option value="saida">Saídas</option>
+          </select>
+
+          <select id="financialFilterCategory" onchange="listarLancamentosFinanceiros()">
+            <option value="">Todas as categorias</option>
+            <option value="Projetos">Projetos</option>
+            <option value="Honorários">Honorários</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Ferramentas">Ferramentas</option>
+            <option value="Operacional">Operacional</option>
+            <option value="Impostos">Impostos</option>
+            <option value="Equipe">Equipe</option>
+            <option value="Outros">Outros</option>
+          </select>
+
+          <select id="financialFilterStatus" onchange="listarLancamentosFinanceiros()">
+            <option value="">Todos os status</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Recebido">Recebido</option>
+            <option value="Pago">Pago</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+
+          <input id="financialFilterDateFrom" type="date" onchange="listarLancamentosFinanceiros()" />
+          <input id="financialFilterDateTo" type="date" onchange="listarLancamentosFinanceiros()" />
+        </div>
+      </section>
+
+      <section class="grid charts-grid">
+        <div class="card">
+          <div class="card-header"><h2>Entradas x Saídas</h2></div>
+          <canvas id="financialOverviewChart" height="220"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>Por categoria</h2></div>
+          <canvas id="financialCategoryChart" height="220"></canvas>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header"><h2>Evolução mensal</h2></div>
+        <canvas id="financialMonthlyChart" height="260"></canvas>
+      </section>
+
+      <section class="card">
+        <div class="card-header"><h2>Lançamentos</h2></div>
+        <div id="financialList" class="list-box"><p class="placeholder">Nenhum lançamento financeiro carregado.</p></div>
+      </section>
+    </div>
+
     <div class="tab-content" id="tab-configuracoes">
       <section class="grid stats-grid">
         <div class="card stat-card"><span>Plano atual</span><strong id="accountPlan">-</strong></div>
@@ -228,22 +338,10 @@
         </div>
 
         <div class="grid stats-grid">
-          <div class="card stat-card">
-            <span>Conectado</span>
-            <strong id="embeddedConnected">Não</strong>
-          </div>
-          <div class="card stat-card">
-            <span>Número conectado</span>
-            <strong id="embeddedDisplayPhone">-</strong>
-          </div>
-          <div class="card stat-card">
-            <span>Nome verificado</span>
-            <strong id="embeddedVerifiedName">-</strong>
-          </div>
-          <div class="card stat-card">
-            <span>Conectado em</span>
-            <strong id="embeddedConnectedAt">-</strong>
-          </div>
+          <div class="card stat-card"><span>Conectado</span><strong id="embeddedConnected">Não</strong></div>
+          <div class="card stat-card"><span>Número conectado</span><strong id="embeddedDisplayPhone">-</strong></div>
+          <div class="card stat-card"><span>Nome verificado</span><strong id="embeddedVerifiedName">-</strong></div>
+          <div class="card stat-card"><span>Conectado em</span><strong id="embeddedConnectedAt">-</strong></div>
         </div>
 
         <div class="form">
@@ -315,13 +413,11 @@
           <input id="adminUserId" type="hidden" />
           <input id="adminUserName" type="text" placeholder="Nome do usuário" disabled />
           <input id="adminUserEmail" type="text" placeholder="E-mail do usuário" disabled />
-
           <select id="adminPlan">
             <option value="trial">trial</option>
             <option value="basic">basic</option>
             <option value="pro">pro</option>
           </select>
-
           <select id="adminAccessStatus">
             <option value="trialing">trialing</option>
             <option value="active">active</option>
@@ -329,10 +425,8 @@
             <option value="canceled">canceled</option>
             <option value="blocked">blocked</option>
           </select>
-
           <input id="adminTrialEndsAt" type="datetime-local" />
           <input id="adminAccessExpiresAt" type="datetime-local" />
-
           <button onclick="salvarAcessoUsuario()">Salvar acesso</button>
           <button onclick="limparAdminForm()">Limpar</button>
         </div>
@@ -350,15 +444,14 @@
 
     let allLeads = [];
     let allProposals = [];
+    let allFinancialEntries = [];
+    let financialChartsCache = null;
     let authMode = "login";
     let isAdminUser = false;
     let fbSdkReady = false;
 
     window.fbAsyncInit = function () {
-      if (!META_APP_ID || META_APP_ID.includes("COLE_AQUI")) {
-        console.warn("META_APP_ID não configurado no index.html");
-        return;
-      }
+      if (!META_APP_ID || META_APP_ID.includes("COLE_AQUI")) return;
 
       FB.init({
         appId: META_APP_ID,
@@ -422,30 +515,18 @@
     function toggleAuthMode() {
       authMode = authMode === "login" ? "register" : "login";
 
-      const title = document.getElementById("authTitle");
-      const toggleBtn = document.getElementById("authToggleBtn");
-      const submitBtn = document.getElementById("authSubmitBtn");
-      const nameWrap = document.getElementById("registerNameWrap");
-      const authMessage = document.getElementById("authMessage");
-      const emailInput = document.getElementById("authEmail");
-      const passwordInput = document.getElementById("authPassword");
+      document.getElementById("authTitle").textContent = authMode === "login" ? "Entrar" : "Criar conta";
+      document.getElementById("authToggleBtn").textContent = authMode === "login" ? "Criar conta" : "Já tenho conta";
+      document.getElementById("authSubmitBtn").textContent = authMode === "login" ? "Entrar no sistema" : "Criar conta";
+      document.getElementById("registerNameWrap").style.display = authMode === "login" ? "none" : "grid";
+      document.getElementById("authMessage").textContent = authMode === "login" ? "Use o usuário demo para entrar." : "Crie sua conta para acessar o CRM.";
 
-      if (authMode === "register") {
-        title.textContent = "Criar conta";
-        toggleBtn.textContent = "Já tenho conta";
-        submitBtn.textContent = "Criar conta";
-        nameWrap.style.display = "grid";
-        authMessage.textContent = "Crie sua conta para acessar o CRM.";
-        emailInput.value = "";
-        passwordInput.value = "";
+      if (authMode === "login") {
+        document.getElementById("authEmail").value = "demo@zapflow.com";
+        document.getElementById("authPassword").value = "123456";
       } else {
-        title.textContent = "Entrar";
-        toggleBtn.textContent = "Criar conta";
-        submitBtn.textContent = "Entrar no sistema";
-        nameWrap.style.display = "none";
-        authMessage.textContent = "Use o usuário demo para entrar.";
-        emailInput.value = "demo@zapflow.com";
-        passwordInput.value = "123456";
+        document.getElementById("authEmail").value = "";
+        document.getElementById("authPassword").value = "";
       }
     }
 
@@ -458,6 +539,13 @@
       if (!value) return "-";
       const d = new Date(value);
       if (isNaN(d.getTime())) return "-";
+      return d.toLocaleDateString("pt-BR");
+    }
+
+    function formatDateTimeBr(value) {
+      if (!value) return "-";
+      const d = new Date(value);
+      if (isNaN(d.getTime())) return "-";
       return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
     }
 
@@ -465,8 +553,15 @@
       if (!value) return "";
       const d = new Date(value);
       if (isNaN(d.getTime())) return "";
-      const pad = (n) => String(n).padStart(2, "0");
+      const pad = n => String(n).padStart(2, "0");
       return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function formatMoneyBr(value) {
+      return Number(value || 0).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      });
     }
 
     function setTechnicalResult(data) {
@@ -505,17 +600,15 @@
 
       document.getElementById("accountPlan").textContent = account.plan || "-";
       document.getElementById("accountStatus").textContent = account.accessStatus || "-";
-      document.getElementById("accountTrialEndsAt").textContent = formatDateBr(account.trialEndsAt);
-      document.getElementById("accountAccessExpiresAt").textContent = formatDateBr(account.accessExpiresAt);
+      document.getElementById("accountTrialEndsAt").textContent = formatDateTimeBr(account.trialEndsAt);
+      document.getElementById("accountAccessExpiresAt").textContent = formatDateTimeBr(account.accessExpiresAt);
 
       let message = "Conta carregada com sucesso.";
 
       if (account.accessStatus === "trialing") {
-        message = `Sua conta está em período de teste até ${formatDateBr(account.trialEndsAt)}.`;
+        message = `Sua conta está em período de teste até ${formatDateTimeBr(account.trialEndsAt)}.`;
       } else if (account.accessStatus === "active") {
-        message = account.accessExpiresAt
-          ? `Seu acesso está ativo até ${formatDateBr(account.accessExpiresAt)}.`
-          : "Seu acesso está ativo.";
+        message = account.accessExpiresAt ? `Seu acesso está ativo até ${formatDateTimeBr(account.accessExpiresAt)}.` : "Seu acesso está ativo.";
       } else if (account.accessStatus === "past_due") {
         message = "Seu acesso está pendente de renovação.";
       } else if (account.accessStatus === "blocked") {
@@ -531,7 +624,7 @@
       document.getElementById("embeddedConnected").textContent = item?.whatsappConnected ? "Sim" : "Não";
       document.getElementById("embeddedDisplayPhone").textContent = item?.whatsappDisplayPhone || "-";
       document.getElementById("embeddedVerifiedName").textContent = item?.whatsappVerifiedName || "-";
-      document.getElementById("embeddedConnectedAt").textContent = formatDateBr(item?.embeddedSignupCompletedAt);
+      document.getElementById("embeddedConnectedAt").textContent = formatDateTimeBr(item?.embeddedSignupCompletedAt);
     }
 
     function showLogin() {
@@ -665,8 +758,6 @@
     }
 
     async function carregarSettings() {
-      setSystemMessage("Carregando configurações do usuário...");
-
       try {
         const res = await fetch(API_URL + "/settings", {
           headers: { "Authorization": "Bearer " + getToken() }
@@ -885,8 +976,6 @@
     async function listarUsuariosAdmin() {
       if (!isAdminUser) return;
 
-      setSystemMessage("Carregando usuários do painel admin...");
-
       try {
         const res = await fetch(API_URL + "/admin/users", {
           headers: authHeaders()
@@ -916,13 +1005,11 @@
             </div>
             <div class="item-line">E-mail: ${item.email}</div>
             <div class="item-line">Plano: ${item.plan || "-"}</div>
-            <div class="item-line">Trial até: ${formatDateBr(item.trialEndsAt)}</div>
-            <div class="item-line">Acesso até: ${formatDateBr(item.accessExpiresAt)}</div>
+            <div class="item-line">Trial até: ${formatDateTimeBr(item.trialEndsAt)}</div>
+            <div class="item-line">Acesso até: ${formatDateTimeBr(item.accessExpiresAt)}</div>
             <button onclick='preencherAdminForm(${JSON.stringify(item).replace(/"/g, '&quot;')})'>Editar acesso</button>
           </div>
         `).join("");
-
-        setSystemMessage("Usuários carregados com sucesso.");
       } catch (error) {
         setSystemMessage("Erro ao listar usuários.");
       }
@@ -959,8 +1046,6 @@
         return;
       }
 
-      setSystemMessage("Salvando acesso do usuário...");
-
       try {
         const payload = {
           plan: document.getElementById("adminPlan").value,
@@ -996,7 +1081,6 @@
           headers: { "Authorization": "Bearer " + getToken() }
         });
         const data = await res.json();
-
         if (!data.ok) return;
 
         const s = data.summary;
@@ -1008,14 +1092,6 @@
         document.getElementById("commercialSent").textContent = s.sentCount;
         document.getElementById("commercialTotalCount").textContent = s.totalCount;
       } catch (error) {}
-    }
-
-    function formatMoneyBr(value) {
-      const number = Number(value || 0);
-      return number.toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-      });
     }
 
     function limparCamposLead() {
@@ -1043,6 +1119,18 @@
       setSystemMessage("Campos de proposta limpos.");
     }
 
+    function limparCamposFinanceiro() {
+      document.getElementById("financialId").value = "";
+      document.getElementById("financialType").value = "entrada";
+      document.getElementById("financialCategory").value = "Projetos";
+      document.getElementById("financialDescription").value = "";
+      document.getElementById("financialAmount").value = "";
+      document.getElementById("financialDate").value = "";
+      document.getElementById("financialStatus").value = "Pendente";
+      document.getElementById("financialNotes").value = "";
+      setSystemMessage("Campos financeiros limpos.");
+    }
+
     function preencherLead(item) {
       document.getElementById("leadId").value = item.id;
       document.getElementById("leadName").value = item.name;
@@ -1055,7 +1143,6 @@
       document.getElementById("leadTemperature").value = item.temperature;
       document.getElementById("leadNextAction").value = item.nextAction;
       document.getElementById("leadNotes").value = item.notes || "";
-      setSystemMessage("Lead carregado para edição.");
       switchTab("leads");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -1067,8 +1154,20 @@
       document.getElementById("proposalValue").value = item.value;
       document.getElementById("proposalStatus").value = item.status;
       document.getElementById("proposalNote").value = item.note || "";
-      setSystemMessage("Proposta carregada para edição.");
       switchTab("propostas");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function preencherLancamentoFinanceiro(item) {
+      document.getElementById("financialId").value = item.id;
+      document.getElementById("financialType").value = item.type;
+      document.getElementById("financialCategory").value = item.category;
+      document.getElementById("financialDescription").value = item.description;
+      document.getElementById("financialAmount").value = item.amount;
+      document.getElementById("financialDate").value = item.entryDate ? String(item.entryDate).slice(0, 10) : "";
+      document.getElementById("financialStatus").value = item.status;
+      document.getElementById("financialNotes").value = item.notes || "";
+      switchTab("financeiro");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -1087,8 +1186,6 @@
       );
 
       if (!customMessage) return;
-
-      setSystemMessage("Enviando mensagem no WhatsApp...");
 
       try {
         const res = await fetch(API_URL + "/whatsapp/send", {
@@ -1137,7 +1234,7 @@
       proposta.innerHTML = "";
       fechado.innerHTML = "";
 
-      const renderCard = (item) => `
+      const renderCard = item => `
         <div class="item-card">
           <div class="item-top">
             <strong>${item.name}</strong>
@@ -1185,7 +1282,6 @@
     }
 
     async function testarBackend() {
-      setSystemMessage("Verificando backend...");
       try {
         const res = await fetch(API_URL + "/me", {
           headers: { "Authorization": "Bearer " + getToken() }
@@ -1193,16 +1289,13 @@
         const data = await res.json();
         document.getElementById("statusBackend").textContent = res.ok ? "Online" : "Erro";
         setTechnicalResult(data);
-        setSystemMessage(res.ok ? "Backend conectado com sucesso." : "Erro ao conectar no backend.");
       } catch (error) {
         document.getElementById("statusBackend").textContent = "Erro";
         setTechnicalResult({ ok: false, error: "Não foi possível conectar no backend" });
-        setSystemMessage("Erro ao conectar no backend.");
       }
     }
 
     async function listarLeads() {
-      setSystemMessage("Carregando leads...");
       try {
         const res = await fetch(API_URL + "/leads", {
           headers: { "Authorization": "Bearer " + getToken() }
@@ -1211,10 +1304,8 @@
         allLeads = data.items || [];
         aplicarFiltros();
         setTechnicalResult(data);
-        setSystemMessage("Leads carregados com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao listar leads" });
-        setSystemMessage("Erro ao listar leads.");
       }
     }
 
@@ -1225,8 +1316,6 @@
     }
 
     async function criarLead() {
-      setSystemMessage("Criando lead...");
-
       try {
         const payload = {
           name: document.getElementById("leadName").value.trim(),
@@ -1240,12 +1329,6 @@
           nextAction: document.getElementById("leadNextAction").value.trim() || "Responder em até 15 min",
           notes: document.getElementById("leadNotes").value.trim()
         };
-
-        if (!payload.name || !payload.project || !payload.city) {
-          setSystemMessage("Preencha nome, projeto e cidade antes de criar o lead.");
-          setTechnicalResult({ ok: false, error: "Campos obrigatórios: nome, projeto e cidade" });
-          return;
-        }
 
         const res = await fetch(API_URL + "/leads", {
           method: "POST",
@@ -1266,13 +1349,10 @@
         setSystemMessage("Lead criado com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao criar lead" });
-        setSystemMessage("Erro ao criar lead.");
       }
     }
 
     async function editarLead(id) {
-      setSystemMessage("Editando lead...");
-
       try {
         const payload = {
           name: document.getElementById("leadName").value.trim(),
@@ -1306,7 +1386,6 @@
         setSystemMessage("Lead editado com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao editar lead" });
-        setSystemMessage("Erro ao editar lead.");
       }
     }
 
@@ -1319,10 +1398,7 @@
         const data = await res.json();
         setTechnicalResult(data);
         await listarLeads();
-        setSystemMessage("Lead avançado no funil.");
-      } catch (error) {
-        setSystemMessage("Erro ao avançar lead.");
-      }
+      } catch (error) {}
     }
 
     async function voltarLead(id) {
@@ -1334,16 +1410,11 @@
         const data = await res.json();
         setTechnicalResult(data);
         await listarLeads();
-        setSystemMessage("Lead voltou uma etapa.");
-      } catch (error) {
-        setSystemMessage("Erro ao voltar lead.");
-      }
+      } catch (error) {}
     }
 
     async function excluirLead(id) {
       if (!confirm("Deseja realmente excluir este lead?")) return;
-
-      setSystemMessage("Excluindo lead...");
 
       try {
         const res = await fetch(API_URL + "/leads/" + id, {
@@ -1360,14 +1431,10 @@
 
         await listarLeads();
         setSystemMessage("Lead excluído com sucesso.");
-      } catch (error) {
-        setTechnicalResult({ ok: false, error: "Erro ao excluir lead" });
-        setSystemMessage("Erro ao excluir lead.");
-      }
+      } catch (error) {}
     }
 
     async function listarPropostas() {
-      setSystemMessage("Carregando propostas...");
       try {
         const res = await fetch(API_URL + "/proposals", {
           headers: { "Authorization": "Bearer " + getToken() }
@@ -1377,10 +1444,8 @@
         aplicarFiltros();
         setTechnicalResult(data);
         await carregarResumoComercial();
-        setSystemMessage("Propostas carregadas com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao listar propostas" });
-        setSystemMessage("Erro ao listar propostas.");
       }
     }
 
@@ -1391,8 +1456,6 @@
     }
 
     async function criarProposta() {
-      setSystemMessage("Criando proposta...");
-
       try {
         const payload = {
           client: document.getElementById("proposalClient").value.trim(),
@@ -1401,12 +1464,6 @@
           status: document.getElementById("proposalStatus").value,
           note: document.getElementById("proposalNote").value.trim()
         };
-
-        if (!payload.client || !payload.title || !payload.value) {
-          setSystemMessage("Preencha cliente, título e valor antes de criar a proposta.");
-          setTechnicalResult({ ok: false, error: "Campos obrigatórios: cliente, título e valor" });
-          return;
-        }
 
         const res = await fetch(API_URL + "/proposals", {
           method: "POST",
@@ -1427,13 +1484,10 @@
         setSystemMessage("Proposta criada com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao criar proposta" });
-        setSystemMessage("Erro ao criar proposta.");
       }
     }
 
     async function editarProposta(id) {
-      setSystemMessage("Editando proposta...");
-
       try {
         const payload = {
           client: document.getElementById("proposalClient").value.trim(),
@@ -1462,14 +1516,11 @@
         setSystemMessage("Proposta editada com sucesso.");
       } catch (error) {
         setTechnicalResult({ ok: false, error: "Erro ao editar proposta" });
-        setSystemMessage("Erro ao editar proposta.");
       }
     }
 
     async function excluirProposta(id) {
       if (!confirm("Deseja realmente excluir esta proposta?")) return;
-
-      setSystemMessage("Excluindo proposta...");
 
       try {
         const res = await fetch(API_URL + "/proposals/" + id, {
@@ -1486,10 +1537,7 @@
 
         await listarPropostas();
         setSystemMessage("Proposta excluída com sucesso.");
-      } catch (error) {
-        setTechnicalResult({ ok: false, error: "Erro ao excluir proposta" });
-        setSystemMessage("Erro ao excluir proposta.");
-      }
+      } catch (error) {}
     }
 
     function renderLeads(items) {
@@ -1545,6 +1593,357 @@
       `).join("");
     }
 
+    async function listarLancamentosFinanceiros() {
+      try {
+        const query = new URLSearchParams();
+        const type = document.getElementById("financialFilterType").value;
+        const category = document.getElementById("financialFilterCategory").value;
+        const status = document.getElementById("financialFilterStatus").value;
+        const dateFrom = document.getElementById("financialFilterDateFrom").value;
+        const dateTo = document.getElementById("financialFilterDateTo").value;
+
+        if (type) query.set("type", type);
+        if (category) query.set("category", category);
+        if (status) query.set("status", status);
+        if (dateFrom) query.set("dateFrom", dateFrom);
+        if (dateTo) query.set("dateTo", dateTo);
+
+        const res = await fetch(API_URL + "/financial/entries" + (query.toString() ? `?${query.toString()}` : ""), {
+          headers: { "Authorization": "Bearer " + getToken() }
+        });
+
+        const data = await res.json();
+        allFinancialEntries = data.items || [];
+        renderFinancialEntries(allFinancialEntries);
+        setTechnicalResult(data);
+      } catch (error) {
+        setTechnicalResult({ ok: false, error: "Erro ao listar lançamentos financeiros" });
+      }
+    }
+
+    async function salvarLancamentoFinanceiro() {
+      const id = document.getElementById("financialId").value.trim();
+      if (id) return editarLancamentoFinanceiro(Number(id));
+      return criarLancamentoFinanceiro();
+    }
+
+    async function criarLancamentoFinanceiro() {
+      try {
+        const payload = {
+          type: document.getElementById("financialType").value,
+          category: document.getElementById("financialCategory").value,
+          description: document.getElementById("financialDescription").value.trim(),
+          amount: Number(document.getElementById("financialAmount").value || 0),
+          entryDate: document.getElementById("financialDate").value,
+          status: document.getElementById("financialStatus").value,
+          notes: document.getElementById("financialNotes").value.trim()
+        };
+
+        const res = await fetch(API_URL + "/financial/entries", {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        setTechnicalResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao criar lançamento.");
+          return;
+        }
+
+        limparCamposFinanceiro();
+        await carregarFinanceiro();
+        setSystemMessage("Lançamento financeiro criado com sucesso.");
+      } catch (error) {
+        setTechnicalResult({ ok: false, error: "Erro ao criar lançamento financeiro" });
+      }
+    }
+
+    async function editarLancamentoFinanceiro(id) {
+      try {
+        const payload = {
+          type: document.getElementById("financialType").value,
+          category: document.getElementById("financialCategory").value,
+          description: document.getElementById("financialDescription").value.trim(),
+          amount: Number(document.getElementById("financialAmount").value || 0),
+          entryDate: document.getElementById("financialDate").value,
+          status: document.getElementById("financialStatus").value,
+          notes: document.getElementById("financialNotes").value.trim()
+        };
+
+        const res = await fetch(API_URL + "/financial/entries/" + id, {
+          method: "PUT",
+          headers: authHeaders(),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        setTechnicalResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao editar lançamento.");
+          return;
+        }
+
+        limparCamposFinanceiro();
+        await carregarFinanceiro();
+        setSystemMessage("Lançamento financeiro editado com sucesso.");
+      } catch (error) {
+        setTechnicalResult({ ok: false, error: "Erro ao editar lançamento financeiro" });
+      }
+    }
+
+    async function excluirLancamentoFinanceiro(id) {
+      if (!confirm("Deseja realmente excluir este lançamento?")) return;
+
+      try {
+        const res = await fetch(API_URL + "/financial/entries/" + id, {
+          method: "DELETE",
+          headers: { "Authorization": "Bearer " + getToken() }
+        });
+
+        const data = await res.json();
+        setTechnicalResult(data);
+
+        if (!res.ok) {
+          setSystemMessage(data.error || "Erro ao excluir lançamento.");
+          return;
+        }
+
+        await carregarFinanceiro();
+        setSystemMessage("Lançamento financeiro excluído com sucesso.");
+      } catch (error) {
+        setTechnicalResult({ ok: false, error: "Erro ao excluir lançamento financeiro" });
+      }
+    }
+
+    async function carregarResumoFinanceiro() {
+      try {
+        const res = await fetch(API_URL + "/financial/summary", {
+          headers: { "Authorization": "Bearer " + getToken() }
+        });
+        const data = await res.json();
+        setTechnicalResult(data);
+
+        if (!res.ok) return;
+
+        const s = data.summary || {};
+        document.getElementById("financialEntradas").textContent = s.entradasFormatadas || formatMoneyBr(s.entradas);
+        document.getElementById("financialSaidas").textContent = s.saidasFormatadas || formatMoneyBr(s.saidas);
+        document.getElementById("financialSaldo").textContent = s.saldoFormatado || formatMoneyBr(s.saldo);
+        document.getElementById("financialLucro").textContent = formatMoneyBr(s.lucroLiquido || 0);
+        document.getElementById("financialTotalLancamentos").textContent = s.totalLancamentos || 0;
+        document.getElementById("financialPendentes").textContent = s.pendentes || 0;
+      } catch (error) {}
+    }
+
+    async function carregarChartsFinanceiros() {
+      try {
+        const res = await fetch(API_URL + "/financial/charts", {
+          headers: { "Authorization": "Bearer " + getToken() }
+        });
+        const data = await res.json();
+        financialChartsCache = data.charts || null;
+        renderFinancialCharts();
+      } catch (error) {}
+    }
+
+    function renderFinancialEntries(items) {
+      const container = document.getElementById("financialList");
+
+      if (!items.length) {
+        container.innerHTML = '<p class="placeholder">Nenhum lançamento encontrado.</p>';
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div class="item-card">
+          <div class="item-top">
+            <strong>${item.description}</strong>
+            <span class="badge">${item.type}</span>
+          </div>
+          <div class="item-line">Categoria: ${item.category}</div>
+          <div class="item-line">Valor: ${formatMoneyBr(item.amount)}</div>
+          <div class="item-line">Data: ${formatDateBr(item.entryDate)}</div>
+          <div class="item-line">Status: ${item.status}</div>
+          <div class="item-line muted">Observações: ${item.notes || "Sem observações"}</div>
+          <button onclick='preencherLancamentoFinanceiro(${JSON.stringify(item)})'>Editar</button>
+          <button onclick="excluirLancamentoFinanceiro(${item.id})">Excluir</button>
+        </div>
+      `).join("");
+    }
+
+    function drawBarChart(canvasId, labels, values, titleA = "", titleB = "") {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const width = canvas.width = canvas.offsetWidth || 600;
+      const height = canvas.height = canvas.height || 220;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const maxValue = Math.max(...values, 1);
+      const left = 50;
+      const right = width - 20;
+      const top = 20;
+      const bottom = height - 35;
+      const chartHeight = bottom - top;
+      const barAreaWidth = right - left;
+      const barWidth = Math.max(30, Math.floor(barAreaWidth / Math.max(values.length, 1) * 0.55));
+      const gap = Math.floor((barAreaWidth - (barWidth * values.length)) / Math.max(values.length, 1));
+
+      ctx.font = "12px Arial";
+      ctx.fillStyle = "#94a3b8";
+      ctx.strokeStyle = "#334155";
+      ctx.beginPath();
+      ctx.moveTo(left, top);
+      ctx.lineTo(left, bottom);
+      ctx.lineTo(right, bottom);
+      ctx.stroke();
+
+      values.forEach((value, i) => {
+        const x = left + gap / 2 + i * (barWidth + gap);
+        const barHeight = (value / maxValue) * (chartHeight - 10);
+        const y = bottom - barHeight;
+
+        ctx.fillStyle = i % 2 === 0 ? "#60a5fa" : "#22c55e";
+        ctx.fillRect(x, y, barWidth, barHeight);
+
+        ctx.fillStyle = "#cbd5e1";
+        ctx.fillText(labels[i], x, bottom + 16);
+        ctx.fillText(formatMoneyBr(value).replace("R$", "R$ "), x, Math.max(14, y - 6));
+      });
+    }
+
+    function drawCategoryChart(canvasId, items) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const width = canvas.width = canvas.offsetWidth || 600;
+      const height = canvas.height = canvas.height || 220;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const grouped = {};
+      items.forEach(item => {
+        const key = `${item.category} (${item.type})`;
+        grouped[key] = (grouped[key] || 0) + Number(item.total || 0);
+      });
+
+      const entries = Object.entries(grouped).slice(0, 6);
+      const total = entries.reduce((sum, [, v]) => sum + v, 0) || 1;
+
+      let startX = 20;
+      let y = 40;
+
+      ctx.font = "13px Arial";
+
+      entries.forEach((entry, index) => {
+        const [label, value] = entry;
+        const w = Math.max(50, ((width - 40) * value) / total);
+
+        ctx.fillStyle = index % 2 === 0 ? "#60a5fa" : "#22c55e";
+        ctx.fillRect(startX, y, w, 28);
+
+        ctx.fillStyle = "#e2e8f0";
+        ctx.fillText(label, startX, y - 8);
+        ctx.fillText(formatMoneyBr(value), startX + 4, y + 19);
+
+        y += 48;
+        startX = 20;
+      });
+    }
+
+    function drawMonthlyChart(canvasId, items) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const width = canvas.width = canvas.offsetWidth || 900;
+      const height = canvas.height = canvas.height || 260;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const left = 50;
+      const right = width - 20;
+      const top = 20;
+      const bottom = height - 35;
+      const chartHeight = bottom - top;
+      const chartWidth = right - left;
+
+      const maxValue = Math.max(
+        ...items.map(i => Math.max(Number(i.entradas || 0), Number(i.saidas || 0))),
+        1
+      );
+
+      ctx.strokeStyle = "#334155";
+      ctx.beginPath();
+      ctx.moveTo(left, top);
+      ctx.lineTo(left, bottom);
+      ctx.lineTo(right, bottom);
+      ctx.stroke();
+
+      const stepX = items.length > 1 ? chartWidth / (items.length - 1) : chartWidth;
+
+      function drawLine(key, color) {
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+
+        items.forEach((item, index) => {
+          const x = left + index * stepX;
+          const y = bottom - (Number(item[key] || 0) / maxValue) * (chartHeight - 10);
+          if (index === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+
+        ctx.stroke();
+
+        items.forEach((item, index) => {
+          const x = left + index * stepX;
+          const y = bottom - (Number(item[key] || 0) / maxValue) * (chartHeight - 10);
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(x, y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      drawLine("entradas", "#22c55e");
+      drawLine("saidas", "#ef4444");
+
+      ctx.fillStyle = "#cbd5e1";
+      ctx.font = "12px Arial";
+      items.forEach((item, index) => {
+        const x = left + index * stepX;
+        ctx.fillText(item.month, x - 18, bottom + 16);
+      });
+    }
+
+    function renderFinancialCharts() {
+      if (!financialChartsCache) return;
+
+      const overview = financialChartsCache.overview || {};
+      const byCategory = financialChartsCache.byCategory || [];
+      const byMonth = financialChartsCache.byMonth || [];
+
+      drawBarChart(
+        "financialOverviewChart",
+        ["Entradas", "Saídas"],
+        [Number(overview.entradas || 0), Number(overview.saidas || 0)]
+      );
+
+      drawCategoryChart("financialCategoryChart", byCategory);
+      drawMonthlyChart("financialMonthlyChart", byMonth);
+    }
+
+    async function carregarFinanceiro() {
+      await carregarResumoFinanceiro();
+      await listarLancamentosFinanceiros();
+      await carregarChartsFinanceiros();
+    }
+
     async function carregarSistema() {
       await testarBackend();
       await carregarAccount();
@@ -1553,12 +1952,14 @@
       await listarLeads();
       await listarPropostas();
       await carregarResumoComercial();
+      await carregarFinanceiro();
       if (isAdminUser) await listarUsuariosAdmin();
       switchTab("dashboard");
     }
 
     loadTheme();
     validarSessao();
+    window.addEventListener("resize", () => renderFinancialCharts());
   </script>
 </body>
 </html>
